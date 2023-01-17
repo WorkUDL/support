@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateReasonsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('reasons', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->comment('Название');
+            $table->integer('weight')->comment('Вес');
+            $table->integer('parent_id')->comment('Вышестоящая проблема')->nullable();
+            $table->foreignIdFor(\App\Models\Group::class)->comment('ID группы ответственных');
+            $table->tinyInteger('visibility')->comment('Видимость')->nullable();
+            $table->foreignIdFor(\App\Models\Information::class)->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('reasons');
+    }
+}

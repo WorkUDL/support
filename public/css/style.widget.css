@@ -1,0 +1,100 @@
+.wlf-widget-bg{
+	position:fixed;
+	left:0;
+	top:0;
+	right:0;
+	bottom:0;
+	background:rgba(0,0,0,0.5);
+	z-index:999998;
+	visibility: hidden;
+	opacity: 0;
+	transition: 0.3s;
+	display: none;
+}
+.wlf-widget-bg-on{
+	display: block!important;
+}
+.wlf-widget-bg-a{
+	visibility: visible;
+	opacity:1;
+}
+.wlf-widget{
+	position:fixed;
+	left:0;
+	top:0;
+	bottom:0;
+	width:100%;
+	max-width:720px;
+	background:#262635;
+	color:#fff;
+	z-index:999999;
+	visibility: hidden;
+	transition: 0.6s;
+	left:-720px;
+	display: none;
+}
+.wlf-widget-on{
+	display: block!important;
+}
+.wlf-widget-a{
+	visibility: visible;
+	opacity:1;
+	left:0px;
+}
+.wlf-widget iframe{
+	position:absolute;
+	left:0;
+	top:0;
+	bottom:0;
+	right:0;
+	width:100%;
+	height:100%;
+	border:0;
+    outline:0;
+	z-index:1;
+}
+.wlf-widget-close{
+	width:30px;
+	height:30px;
+	position:absolute;
+	z-index:5;
+	right:20px;
+	top:20px;
+	background:url(../img/cross.svg) center center no-repeat;
+	background-size:14px auto;
+	opacity:0.3;
+	cursor: pointer;
+	transition:0.2s;
+}
+.wlf-widget-close:hover{
+	opacity:1;
+}
+
+.wlf-pop{
+	position:fixed;
+	z-index:999997;
+	width: 100px;
+    height: 100px;
+	cursor:pointer;
+	left:10px;
+	bottom:-30px;
+	background:url(../img/gift.png) center center no-repeat;
+	background-size:contain;
+	transform-origin: right bottom;
+	outline: 0;
+	-webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+}
+.wlf-pop-a{
+	animation: 5s wlf_anim infinite;
+}
+@keyframes wlf_anim{
+    0%{
+		transform: rotate(0deg);
+	}
+    50%{
+		transform: rotate(-6deg);
+	}
+    100%{
+		transform: rotate(0deg);
+	}
+}
