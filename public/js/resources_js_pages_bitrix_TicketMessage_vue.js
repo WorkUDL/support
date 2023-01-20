@@ -40,6 +40,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       ticketAction: null,
       archive: false,
       openDialog: false,
+      dialogImg: false,
+      currentImg: null,
       reasonId: '',
       reasonName: '',
       loadingParticipants: false,
@@ -64,6 +66,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         deep: true
       },
       active: false,
+      file: null,
+      isFileUploading: false,
       sendingMessage: false,
       message: null,
       scrollInvoked: 0,
@@ -130,6 +134,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         }
       }).then(function (resp) {
         return _this.items = resp.data.map(function (item) {
+          _this.getFiles();
           return {
             id: item.id,
             photo: item.photo,
@@ -139,6 +144,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             last_name: item.last_name,
             name: item.name,
             second_name: item.second_name,
+            path: item.path,
             date: item.date
           };
         });
@@ -205,8 +211,43 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         return _this4.sendingMessage = false;
       });
     },
-    getTicket: function getTicket() {
+    addFile: function addFile(event) {
       var _this5 = this;
+      this.isFileUploading = true;
+      var file = event;
+      var data = new FormData();
+      data.append('file', file);
+      data.append('ticket_id', this.ticket_id);
+      axios.post('/api/message/add', data, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (resp) {
+        _this5.isFileUploading = false;
+        _this5.file = resp.data.body;
+      })["catch"](function (err) {
+        _this5.isFileUploading = false;
+        console.log(err);
+      })["finally"](this.file = null);
+    },
+    getFiles: function getFiles() {
+      var _this6 = this;
+      axios.post('/api/file/get', {
+        ticket_id: this.ticket_id
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (resp) {
+        return console.log(resp);
+      })["catch"](function () {
+        return _this6.$router.replace({
+          name: 'bitrix-tickets'
+        });
+      });
+    },
+    getTicket: function getTicket() {
+      var _this7 = this;
       axios.post('/api/ticket/get', {
         id: this.ticket_id
       }, {
@@ -214,12 +255,12 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this5.reasonId = resp.data.reason_id;
-        _this5.active = resp.data.active;
+        _this7.reasonId = resp.data.reason_id;
+        _this7.active = resp.data.active;
       })["catch"](function (err) {
         return console.error(err);
       })["finally"](function () {
-        return _this5.sendingMessage = false;
+        return _this7.sendingMessage = false;
       });
     },
     getUser: function getUser(item) {
@@ -229,7 +270,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       return user ? user.name : item.user_id;
     },
     getReasonName: function getReasonName() {
-      var _this6 = this;
+      var _this8 = this;
       axios.post('/api/reason/get', {
         id: this.reasonId
       }, {
@@ -239,17 +280,17 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       }).then(function (resp) {
         var reasonsList = resp.data; // Список проблем
         var result = reasonsList.filter(function (el) {
-          if (_this6.reasonId === el.id) {
+          if (_this8.reasonId === el.id) {
             return el.name;
           }
         });
-        _this6.reasonName = result[0].name;
+        _this8.reasonName = result[0].name;
       })["catch"](function (err) {
         return console.error(err);
       });
     },
     dataOfCreator: function dataOfCreator() {
-      var _this7 = this;
+      var _this9 = this;
       axios.post('/api/user/data', {
         id: this.ticket_id
       }, {
@@ -257,7 +298,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this7.userCreatedTicket = resp.data;
+        _this9.userCreatedTicket = resp.data;
         BX24.callBatch({
           get_user: {
             method: 'user.get',
@@ -280,8 +321,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             str += i === 0 ? '' : ', ';
             str += result.get_department.data()[i].NAME;
           }
-          _this7.departmentPosition = str;
-          _this7.workPosition = wrk;
+          _this9.departmentPosition = str;
+          _this9.workPosition = wrk;
         });
       })["catch"](function (err) {
         return console.log(err);
@@ -291,7 +332,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       this.openDialog = true;
     },
     toArchive: function toArchive() {
-      var _this8 = this;
+      var _this10 = this;
       this.archive = true;
       axios.post('/api/ticket/archive', {
         id: this.ticket_id,
@@ -301,13 +342,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function () {
-        _this8.openDialog = false;
+        _this10.openDialog = false;
         console.log('Тикет отправлен в архив');
       })["catch"](function (err) {
         return console.error(err);
       })["finally"](function () {
-        _this8.archive = false;
-        _this8.$router.push({
+        _this10.archive = false;
+        _this10.$router.push({
           name: 'bitrix-tickets'
         });
       });
@@ -744,9 +785,26 @@ var render = function render() {
       staticClass: "text-right"
     }, [_c("v-list-item-title", [_c("div"), _vm._v(" "), _c("div", {
       staticClass: "font-weight-bold"
-    }, [_vm._v(_vm._s(item.last_name) + " " + _vm._s(item.name) + " " + _vm._s(item.second_name))]), _vm._v(" "), _c("div", {
+    }, [_vm._v(_vm._s(item.last_name) + " " + _vm._s(item.name) + " " + _vm._s(item.second_name))]), _vm._v(" "), !item.message.includes("/storage/files/") ? _c("div", {
       staticClass: "pre"
-    }, [_vm._v(_vm._s(item.message))])]), _vm._v(" "), _c("v-list-item-subtitle", [_vm._v("\n                            " + _vm._s(new Date(item.date).toLocaleString()) + "\n                        ")])], 1), _vm._v(" "), _c("v-list-item-avatar", {
+    }, [_vm._v(" " + _vm._s(item.message) + " ")]) : _vm._e(), _vm._v(" "), item.message && item.message.includes("/storage/files/") ? _c("div", {
+      staticClass: "pre"
+    }, [_c("img", {
+      staticStyle: {
+        width: "250px",
+        height: "200px",
+        cursor: "pointer"
+      },
+      attrs: {
+        src: item.message
+      },
+      on: {
+        click: function click($event) {
+          _vm.dialogImg = true;
+          _vm.currentImg = item.message;
+        }
+      }
+    })]) : _vm._e()]), _vm._v(" "), _c("v-list-item-subtitle", [_vm._v("\n                            " + _vm._s(new Date(item.date).toLocaleString()) + "\n                        ")])], 1), _vm._v(" "), _c("v-list-item-avatar", {
       staticClass: "float-right"
     }, [_c("v-img", {
       attrs: {
@@ -768,9 +826,26 @@ var render = function render() {
       }
     })], 1), _vm._v(" "), _c("v-list-item-content", [_c("v-list-item-title", [_c("div", {
       staticClass: "font-weight-bold"
-    }, [_vm._v(_vm._s(item.last_name) + " " + _vm._s(item.name) + " " + _vm._s(item.second_name))]), _vm._v(" "), _c("div", {
+    }, [_vm._v(_vm._s(item.last_name) + " " + _vm._s(item.name) + " " + _vm._s(item.second_name))]), _vm._v(" "), !item.message.includes("/storage/files/") ? _c("div", {
       staticClass: "pre"
-    }, [_vm._v(_vm._s(item.message))])]), _vm._v(" "), _c("v-list-item-subtitle", {
+    }, [_vm._v(_vm._s(item.message))]) : _vm._e(), _vm._v(" "), item.message && item.message.includes("/storage/files/") ? _c("div", {
+      staticClass: "pre"
+    }, [_c("img", {
+      staticStyle: {
+        width: "250px",
+        height: "200px",
+        cursor: "pointer"
+      },
+      attrs: {
+        src: item.message
+      },
+      on: {
+        click: function click($event) {
+          _vm.dialogImg = true;
+          _vm.currentImg = item.message;
+        }
+      }
+    })]) : _vm._e()]), _vm._v(" "), _c("v-list-item-subtitle", {
       staticClass: "grey--text caption"
     }, [_vm._v("\n                            " + _vm._s(new Date(item.date).toLocaleString()) + "\n                        ")])], 1)], 1)];
   })], 2)], 1), _vm._v(" "), _vm.active ? _c("v-row", {
@@ -797,14 +872,41 @@ var render = function render() {
     scopedSlots: _vm._u([{
       key: "append",
       fn: function fn() {
-        return [_c("v-speed-dial", {
+        return [_c("div", {
+          staticClass: "d-flex justify-content-around",
+          staticStyle: {
+            position: "relative",
+            top: "-25px"
+          }
+        }, [!_vm.isFileUploading ? _c("v-file-input", {
+          ref: "fileInput",
+          staticClass: "mb-9",
+          attrs: {
+            "hide-input": ""
+          },
+          on: {
+            change: _vm.addFile
+          },
+          model: {
+            value: _vm.file,
+            callback: function callback($$v) {
+              _vm.file = $$v;
+            },
+            expression: "file"
+          }
+        }) : _vm._e(), _vm._v(" "), _vm.isFileUploading ? _c("div", {
+          staticClass: "mb-9"
+        }, [_c("v-progress-circular", {
+          attrs: {
+            indeterminate: "",
+            color: "primary"
+          }
+        }), _vm._v(" "), _c("p", [_vm._v("Uploading file...")])], 1) : _vm._e(), _vm._v(" "), _c("v-speed-dial", {
           scopedSlots: _vm._u([{
             key: "activator",
             fn: function fn() {
               return [_c("v-btn", {
-                staticStyle: {
-                  bottom: "17px"
-                },
+                staticClass: "my-3 mb-9",
                 attrs: {
                   color: "primary",
                   dark: "",
@@ -814,7 +916,7 @@ var render = function render() {
               }, [_c("v-icon", [_vm._v("mdi-widgets")])], 1)];
             },
             proxy: true
-          }], null, false, 740587817)
+          }], null, false, 984443452)
         }, [_vm._v(" "), _c("v-btn", {
           attrs: {
             fab: "",
@@ -828,7 +930,7 @@ var render = function render() {
           attrs: {
             color: "white"
           }
-        }, [_vm._v("\n                                    mdi-delete\n                                ")])], 1), _vm._v(" "), _c("v-btn", {
+        }, [_vm._v("\n                                        mdi-delete\n                                    ")])], 1), _vm._v(" "), _c("v-btn", {
           attrs: {
             loading: _vm.loadingParticipants,
             fab: "",
@@ -842,19 +944,7 @@ var render = function render() {
           attrs: {
             color: "white"
           }
-        }, [_vm._v("\n                                    mdi-account-supervisor\n                                ")])], 1), _vm._v(" "), _c("v-btn", {
-          attrs: {
-            small: "",
-            fab: "",
-            color: "green"
-          }
-        }, [_c("v-file-input", {
-          staticClass: "mb-4 ml-2",
-          attrs: {
-            color: "white",
-            "hide-input": ""
-          }
-        })], 1)], 1), _vm._v(" "), _c("v-btn", {
+        }, [_vm._v("\n                                        mdi-account-supervisor\n                                    ")])], 1)], 1)], 1), _vm._v(" "), _c("v-btn", {
           staticClass: "mx-2",
           staticStyle: {
             bottom: "10px",
@@ -878,7 +968,7 @@ var render = function render() {
         }, [_vm._v("\n                                mdi-send\n                            ")])], 1)];
       },
       proxy: true
-    }], null, false, 2345616889),
+    }], null, false, 1851605663),
     model: {
       value: _vm.message,
       callback: function callback($$v) {
@@ -1093,7 +1183,32 @@ var render = function render() {
     on: {
       click: _vm.toArchive
     }
-  }, [_vm._v("\n                           В архив\n                        ")])], 1)], 1)], 1)], 1)]], 2);
+  }, [_vm._v("\n                           В архив\n                        ")])], 1)], 1)], 1)], 1)], _vm._v(" "), [_c("v-dialog", {
+    attrs: {
+      "max-width": "1000"
+    },
+    model: {
+      value: _vm.dialogImg,
+      callback: function callback($$v) {
+        _vm.dialogImg = $$v;
+      },
+      expression: "dialogImg"
+    }
+  }, [_c("v-card", [_c("v-img", {
+    attrs: {
+      src: _vm.currentImg
+    }
+  }), _vm._v(" "), _c("v-card-actions", [_c("v-btn", {
+    attrs: {
+      color: "primary",
+      text: ""
+    },
+    on: {
+      click: function click($event) {
+        _vm.dialogImg = false;
+      }
+    }
+  }, [_vm._v("Закрыть")])], 1)], 1)], 1)]], 2);
 };
 var staticRenderFns = [];
 render._withStripped = true;
@@ -1461,7 +1576,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_laravel_mix_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".sticky-bottom {\n  position: fixed;\n  left: 12px;\n  bottom: 12px;\n  background: #fff;\n  width: 100%;\n}\n.pre {\n  white-space: pre-wrap;\n}\n.transit {\n  height: 21px;\n  width: 24px;\n  padding: 1px;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".image {\n  width: 50px;\n  height: 50px;\n  cursor: pointer;\n}\n.sticky-bottom {\n  position: fixed;\n  left: 12px;\n  bottom: 12px;\n  background: #fff;\n  width: 100%;\n}\n.pre {\n  white-space: pre-wrap;\n}\n.transit {\n  height: 21px;\n  width: 24px;\n  padding: 1px;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 

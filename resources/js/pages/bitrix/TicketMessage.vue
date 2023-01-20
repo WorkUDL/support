@@ -47,7 +47,13 @@
                             <v-list-item-title>
                                 <div></div>
                                 <div class="font-weight-bold">{{ item.last_name }} {{ item.name }} {{ item.second_name }}</div>
-                                <div class="pre">{{ item.message }}</div>
+                                <div class="pre" v-if="!item.message.includes('/storage/files/')"> {{ item.message }} </div>
+                                <div class="pre" v-if="item.message && item.message.includes('/storage/files/')"> <img :src="item.message"
+                                                       style="width: 250px;
+                                                       height: 200px;
+                                                       cursor: pointer;"
+                                                       @click="dialogImg = true; currentImg = item.message">
+                                </div>
                             </v-list-item-title>
                             <v-list-item-subtitle>
                                 {{ new Date(item.date).toLocaleString() }}
@@ -67,7 +73,13 @@
                         <v-list-item-content>
                             <v-list-item-title>
                                 <div class="font-weight-bold">{{ item.last_name }} {{ item.name }} {{ item.second_name }}</div>
-                                <div class="pre">{{ item.message }}</div>
+                                <div class="pre" v-if="!item.message.includes('/storage/files/')">{{ item.message }}</div>
+                                <div class="pre" v-if="item.message && item.message.includes('/storage/files/')"> <img :src="item.message"
+                                                       style="width: 250px;
+                                                       height: 200px;
+                                                       cursor: pointer;"
+                                                       @click="dialogImg = true; currentImg = item.message">
+                                </div>
                             </v-list-item-title>
                             <v-list-item-subtitle class="grey--text caption">
                                 {{ new Date(item.date).toLocaleString() }}
@@ -90,55 +102,65 @@
                         @keydown.prevent.enter="pressKey"
                     >
                         <template v-slot:append>
-                            <v-speed-dial>
-                                <template v-slot:activator>
-                                    <v-btn
+                            <div class="d-flex justify-content-around"
+                            style="position: relative;
+                            top: -25px;">
+                                <v-file-input
+                                    @change="addFile"
+                                    v-model="file"
+                                    ref="fileInput"
+                                    class="mb-9"
+                                    hide-input
+                                    v-if="!isFileUploading"
+                                ></v-file-input>
+                                <div v-if="isFileUploading"
+                                     class="mb-9"
+                                >
+                                    <v-progress-circular
+                                        indeterminate
                                         color="primary"
-                                        dark
+                                    ></v-progress-circular>
+                                    <p>Uploading file...</p>
+                                </div>
+                                <v-speed-dial>
+                                    <template v-slot:activator>
+                                        <v-btn
+                                            class="my-3 mb-9"
+                                            color="primary"
+                                            dark
+                                            fab
+                                            small
+                                        >
+                                            <v-icon>mdi-widgets</v-icon>
+                                        </v-btn>
+                                    </template>
+                                    <v-btn
+                                        @click="archiveConfirm"
                                         fab
                                         small
-                                        style="bottom: 17px"
+                                        color="red"
                                     >
-                                        <v-icon>mdi-widgets</v-icon>
+                                        <v-icon
+                                        color="white"
+                                        >
+                                            mdi-delete
+                                        </v-icon>
                                     </v-btn>
-                                </template>
-                                <v-btn
-                                    @click="archiveConfirm"
-                                    fab
-                                    small
-                                    color="red"
-                                >
-                                    <v-icon
-                                    color="white"
+                                    <v-btn
+                                        :loading="loadingParticipants"
+                                        @click="getParticipants"
+                                        fab
+                                        small
+                                        color="blue"
                                     >
-                                        mdi-delete
-                                    </v-icon>
-                                </v-btn>
-                                <v-btn
-                                    :loading="loadingParticipants"
-                                    @click="getParticipants"
-                                    fab
-                                    small
-                                    color="blue"
-                                >
-                                    <v-icon
-                                        color="white"
-                                    >
-                                        mdi-account-supervisor
-                                    </v-icon>
-                                </v-btn>
-                                <v-btn
-                                small
-                                fab
-                                color="green"
-                                >
-                                    <v-file-input
-                                        class="mb-4 ml-2"
-                                        color="white"
-                                        hide-input
-                                    ></v-file-input>
-                                </v-btn>
-                            </v-speed-dial>
+                                        <v-icon
+                                            color="white"
+                                        >
+                                            mdi-account-supervisor
+                                        </v-icon>
+                                    </v-btn>
+                                </v-speed-dial>
+                            </div>
                             <v-btn
                                 class="mx-2"
                                 fab
@@ -315,6 +337,16 @@
                 </v-dialog>
             </v-row>
         </template>
+        <template>
+            <v-dialog v-model="dialogImg" max-width="1000">
+                <v-card>
+                    <v-img :src="currentImg"></v-img>
+                    <v-card-actions>
+                        <v-btn color="primary" text @click="dialogImg = false">Закрыть</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+        </template>
     </v-col>
 </template>
 
@@ -339,6 +371,8 @@ export default {
             ticketAction: null,
             archive: false,
             openDialog: false,
+            dialogImg: false,
+            currentImg: null,
             reasonId: '',
             reasonName: '',
             loadingParticipants: false,
@@ -371,6 +405,8 @@ export default {
                 deep: true,
             },
             active: false,
+            file: null,
+            isFileUploading: false,
             sendingMessage: false,
             message: null,
             scrollInvoked: 0,
@@ -440,6 +476,7 @@ export default {
                     }
                 })
                 .then(resp => this.items = resp.data.map(item => {
+                    this.getFiles()
                     return {
                         id: item.id,
                         photo: item.photo,
@@ -449,6 +486,7 @@ export default {
                         last_name: item.last_name,
                         name: item.name,
                         second_name: item.second_name,
+                        path:item.path,
                         date: item.date,
                     }
                 }))
@@ -510,6 +548,39 @@ export default {
                 .then(() => this.message = null)
                 .catch(err => console.error(err))
                 .finally(() => this.sendingMessage = false)
+        },
+        addFile(event){
+            this.isFileUploading = true
+            let file = event
+            let data = new FormData();
+            data.append('file', file);
+            data.append('ticket_id', this.ticket_id);
+            axios
+                .post('/api/message/add', data, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(resp => {
+                this.isFileUploading = false
+                this.file = resp.data.body
+            }).catch(err => {
+                this.isFileUploading = false
+                console.log(err)
+            }).finally(this.file = null)
+        },
+        getFiles(){
+            axios
+                .post('/api/file/get', {
+                    ticket_id: this.ticket_id
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                })
+                .then(resp => console.log(resp))
+                .catch(() => this.$router.replace({
+                    name: 'bitrix-tickets'
+                }))
         },
         getTicket(){
             axios
@@ -656,6 +727,11 @@ export default {
 </script>
 
 <style lang="scss">
+.image {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
 .sticky-bottom {
     position: fixed;
     left: 12px;

@@ -60,6 +60,14 @@ Route::group([
 
 Route::group([
     'middleware' => 'auth:sanctum',
+    'prefix' => 'file'
+], function ($router) {
+    Route::post('/get', [\App\Http\Controllers\FileController::class, 'get']);
+    Route::post('/add', [\App\Http\Controllers\FileController::class, 'add']);
+});
+
+Route::group([
+    'middleware' => 'auth:sanctum',
     'prefix' => 'message_read'
 ], function ($router) {
     Route::post('/read', [\App\Http\Controllers\MessageReadController::class, 'read']);
