@@ -11,13 +11,28 @@
                         align-items: flex-start;
                         display: flex;"
                     > <div
-                        style="height: 90px;"
+                        style="height: 145px;"
                         v-if="isAdmin || isManager && ticketInfo"
                     >
                              Отдел продаж: {{departmentPosition}}
                         <br> Тема тикета: {{ reasonName }}
                         <br> Должность сотрудника: {{ workPosition }}
                         <br> б24.юдл.рф/company/personal/user/{{ userCreatedTicket }}/
+                        <br>
+                        <div class="justify-content-around d-flex">
+                            <div class="justify-content-around d-flex" v-for="template in templateResponses.slice(0, 5)" :key="template">
+                                <div @click="sendTemplate(template)" class="rounded mt-2 pa-2 primary white--text">
+                                    {{ template.length > 15 ? template.slice(0,15)+'...' : template }}
+                                </div>
+                                <v-icon
+                                    class="mt-2 mr-2"
+                                    @click="templateDelete(template)"
+                                    color="red"
+                                >
+                                    mdi-close
+                                </v-icon>
+                            </div>
+                        </div>
                     </div>
                     <div></div> <!-- Этот див нужен для фиксации v-switch  -->
                         <div
@@ -410,6 +425,7 @@ export default {
             sendingMessage: false,
             message: null,
             scrollInvoked: 0,
+            templateResponses: [],
             items: [],
             requiredRules: [
                 v => (!!v && !!v.length) || 'Обязательное поле'
@@ -475,22 +491,23 @@ export default {
                         Authorization: 'Bearer '+this.currentToken
                     }
                 })
-                .then(resp => this.items = resp.data.map(item => {
+                .then(resp => {
+                    this.items = resp.data.map(item => {
+                        return {
+                            id: item.id,
+                            photo: item.photo,
+                            message: item.message,
+                            user_id: item.user_id,
+                            bitrix_id: item.bitrix_id,
+                            last_name: item.last_name,
+                            name: item.name,
+                            second_name: item.second_name,
+                            path:item.path,
+                            date: item.date,
+                        }
+                    })
                     this.getFiles()
-                    return {
-                        id: item.id,
-                        photo: item.photo,
-                        message: item.message,
-                        user_id: item.user_id,
-                        bitrix_id: item.bitrix_id,
-                        last_name: item.last_name,
-                        name: item.name,
-                        second_name: item.second_name,
-                        path:item.path,
-                        date: item.date,
-                    }
-                }))
-                .catch(() => this.$router.replace({
+                }).catch(() => this.$router.replace({
                     name: 'bitrix-tickets'
                 }))
         },
@@ -549,7 +566,22 @@ export default {
                 .catch(err => console.error(err))
                 .finally(() => this.sendingMessage = false)
         },
-        addFile(event){
+        sendTemplate(item) {
+            this.message = item
+            this.sendMessage()
+        },
+        templateDelete(template) {
+            axios
+                .post('/api/template_response/delete', {data: template}, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }). then(res => {
+                    this.templateResponses = this.templateResponses.filter(item => item !== template)
+                })
+                .catch(err => console.log(err))
+        },
+        addFile(event) {
             this.isFileUploading = true
             let file = event
             let data = new FormData();
@@ -577,7 +609,7 @@ export default {
                         Authorization: 'Bearer '+this.currentToken
                     }
                 })
-                .then(resp => console.log(resp))
+                .then(resp => {})
                 .catch(() => this.$router.replace({
                     name: 'bitrix-tickets'
                 }))
@@ -593,6 +625,7 @@ export default {
                 })
                 .then(resp => {
                     this.reasonId = resp.data.reason_id
+                    console.log(this.reasonId)
                     this.active = resp.data.active
                 })
                 .catch(err => console.error(err))
@@ -622,6 +655,22 @@ export default {
                     this.reasonName = result[0].name
                 })
                 .catch(err => console.error(err))
+        },
+        getTemplates() {
+            axios
+                .post('/api/template_response/get', {
+                    ticket_id: this.ticket_id
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => {
+                    let temp = res.data.map((el)=>{
+                        this.templateResponses.push(el.template_response)
+                    })
+                    console.log(this.templateResponses)
+                })
+                .catch(err => console.log(err))
         },
         dataOfCreator() {
             axios
@@ -705,6 +754,7 @@ export default {
         this.getMessages()
         this.getReasonName()
         this.dataOfCreator()
+        this.getTemplates()
 
 
         this.$socket.emit('messages', {

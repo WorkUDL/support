@@ -71,6 +71,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       sendingMessage: false,
       message: null,
       scrollInvoked: 0,
+      templateResponses: [],
       items: [],
       requiredRules: [function (v) {
         return !!v && !!v.length || 'Обязательное поле';
@@ -133,8 +134,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        return _this.items = resp.data.map(function (item) {
-          _this.getFiles();
+        _this.items = resp.data.map(function (item) {
           return {
             id: item.id,
             photo: item.photo,
@@ -148,6 +148,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             date: item.date
           };
         });
+        _this.getFiles();
       })["catch"](function () {
         return _this.$router.replace({
           name: 'bitrix-tickets'
@@ -211,8 +212,28 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         return _this4.sendingMessage = false;
       });
     },
-    addFile: function addFile(event) {
+    sendTemplate: function sendTemplate(item) {
+      this.message = item;
+      this.sendMessage();
+    },
+    templateDelete: function templateDelete(template) {
       var _this5 = this;
+      axios.post('/api/template_response/delete', {
+        data: template
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        _this5.templateResponses = _this5.templateResponses.filter(function (item) {
+          return item !== template;
+        });
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    addFile: function addFile(event) {
+      var _this6 = this;
       this.isFileUploading = true;
       var file = event;
       var data = new FormData();
@@ -223,31 +244,29 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this5.isFileUploading = false;
-        _this5.file = resp.data.body;
+        _this6.isFileUploading = false;
+        _this6.file = resp.data.body;
       })["catch"](function (err) {
-        _this5.isFileUploading = false;
+        _this6.isFileUploading = false;
         console.log(err);
       })["finally"](this.file = null);
     },
     getFiles: function getFiles() {
-      var _this6 = this;
+      var _this7 = this;
       axios.post('/api/file/get', {
         ticket_id: this.ticket_id
       }, {
         headers: {
           Authorization: 'Bearer ' + this.currentToken
         }
-      }).then(function (resp) {
-        return console.log(resp);
-      })["catch"](function () {
-        return _this6.$router.replace({
+      }).then(function (resp) {})["catch"](function () {
+        return _this7.$router.replace({
           name: 'bitrix-tickets'
         });
       });
     },
     getTicket: function getTicket() {
-      var _this7 = this;
+      var _this8 = this;
       axios.post('/api/ticket/get', {
         id: this.ticket_id
       }, {
@@ -255,12 +274,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this7.reasonId = resp.data.reason_id;
-        _this7.active = resp.data.active;
+        _this8.reasonId = resp.data.reason_id;
+        console.log(_this8.reasonId);
+        _this8.active = resp.data.active;
       })["catch"](function (err) {
         return console.error(err);
       })["finally"](function () {
-        return _this7.sendingMessage = false;
+        return _this8.sendingMessage = false;
       });
     },
     getUser: function getUser(item) {
@@ -270,7 +290,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       return user ? user.name : item.user_id;
     },
     getReasonName: function getReasonName() {
-      var _this8 = this;
+      var _this9 = this;
       axios.post('/api/reason/get', {
         id: this.reasonId
       }, {
@@ -280,17 +300,34 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       }).then(function (resp) {
         var reasonsList = resp.data; // Список проблем
         var result = reasonsList.filter(function (el) {
-          if (_this8.reasonId === el.id) {
+          if (_this9.reasonId === el.id) {
             return el.name;
           }
         });
-        _this8.reasonName = result[0].name;
+        _this9.reasonName = result[0].name;
       })["catch"](function (err) {
         return console.error(err);
       });
     },
+    getTemplates: function getTemplates() {
+      var _this10 = this;
+      axios.post('/api/template_response/get', {
+        ticket_id: this.ticket_id
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        var temp = res.data.map(function (el) {
+          _this10.templateResponses.push(el.template_response);
+        });
+        console.log(_this10.templateResponses);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
     dataOfCreator: function dataOfCreator() {
-      var _this9 = this;
+      var _this11 = this;
       axios.post('/api/user/data', {
         id: this.ticket_id
       }, {
@@ -298,7 +335,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this9.userCreatedTicket = resp.data;
+        _this11.userCreatedTicket = resp.data;
         BX24.callBatch({
           get_user: {
             method: 'user.get',
@@ -321,8 +358,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             str += i === 0 ? '' : ', ';
             str += result.get_department.data()[i].NAME;
           }
-          _this9.departmentPosition = str;
-          _this9.workPosition = wrk;
+          _this11.departmentPosition = str;
+          _this11.workPosition = wrk;
         });
       })["catch"](function (err) {
         return console.log(err);
@@ -332,7 +369,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       this.openDialog = true;
     },
     toArchive: function toArchive() {
-      var _this10 = this;
+      var _this12 = this;
       this.archive = true;
       axios.post('/api/ticket/archive', {
         id: this.ticket_id,
@@ -342,13 +379,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function () {
-        _this10.openDialog = false;
+        _this12.openDialog = false;
         console.log('Тикет отправлен в архив');
       })["catch"](function (err) {
         return console.error(err);
       })["finally"](function () {
-        _this10.archive = false;
-        _this10.$router.push({
+        _this12.archive = false;
+        _this12.$router.push({
           name: 'bitrix-tickets'
         });
       });
@@ -369,6 +406,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     this.getMessages();
     this.getReasonName();
     this.dataOfCreator();
+    this.getTemplates();
     this.$socket.emit('messages', {
       ticket_id: this.ticket_id
     }, function (response) {
@@ -751,9 +789,33 @@ var render = function render() {
     }
   }, [_vm.isAdmin || _vm.isManager && _vm.ticketInfo ? _c("div", {
     staticStyle: {
-      height: "90px"
+      height: "145px"
     }
-  }, [_vm._v("\n                         Отдел продаж: " + _vm._s(_vm.departmentPosition) + "\n                    "), _c("br"), _vm._v(" Тема тикета: " + _vm._s(_vm.reasonName) + "\n                    "), _c("br"), _vm._v(" Должность сотрудника: " + _vm._s(_vm.workPosition) + "\n                    "), _c("br"), _vm._v(" б24.юдл.рф/company/personal/user/" + _vm._s(_vm.userCreatedTicket) + "/\n                ")]) : _vm._e(), _vm._v(" "), _c("div"), _vm._v(" "), _c("div", {
+  }, [_vm._v("\n                         Отдел продаж: " + _vm._s(_vm.departmentPosition) + "\n                    "), _c("br"), _vm._v(" Тема тикета: " + _vm._s(_vm.reasonName) + "\n                    "), _c("br"), _vm._v(" Должность сотрудника: " + _vm._s(_vm.workPosition) + "\n                    "), _c("br"), _vm._v(" б24.юдл.рф/company/personal/user/" + _vm._s(_vm.userCreatedTicket) + "/\n                    "), _c("br"), _vm._v(" "), _c("div", {
+    staticClass: "justify-content-around d-flex"
+  }, _vm._l(_vm.templateResponses.slice(0, 5), function (template) {
+    return _c("div", {
+      key: template,
+      staticClass: "justify-content-around d-flex"
+    }, [_c("div", {
+      staticClass: "rounded mt-2 pa-2 primary white--text",
+      on: {
+        click: function click($event) {
+          return _vm.sendTemplate(template);
+        }
+      }
+    }, [_vm._v("\n                                " + _vm._s(template.length > 15 ? template.slice(0, 15) + "..." : template) + "\n                            ")]), _vm._v(" "), _c("v-icon", {
+      staticClass: "mt-2 mr-2",
+      attrs: {
+        color: "red"
+      },
+      on: {
+        click: function click($event) {
+          return _vm.templateDelete(template);
+        }
+      }
+    }, [_vm._v("\n                                mdi-close\n                            ")])], 1);
+  }), 0)]) : _vm._e(), _vm._v(" "), _c("div"), _vm._v(" "), _c("div", {
     staticStyle: {
       height: "20px"
     }

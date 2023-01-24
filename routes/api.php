@@ -33,6 +33,15 @@ Route::group([
 
 Route::group([
     'middleware' => 'auth:sanctum',
+    'prefix' => 'template_response'
+], function ($router) {
+    Route::post('/get', [\App\Http\Controllers\TemplateResponseController::class, 'get']);
+    Route::post('/add', [\App\Http\Controllers\TemplateResponseController::class, 'add']);
+    Route::post('/delete', [\App\Http\Controllers\TemplateResponseController::class, 'delete']);
+});
+
+Route::group([
+    'middleware' => 'auth:sanctum',
     'prefix' => 'group'
 ], function ($router) {
     Route::post('/add', [\App\Http\Controllers\GroupController::class, 'add']);

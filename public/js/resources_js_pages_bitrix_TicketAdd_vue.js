@@ -31,6 +31,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       fullHint: null,
       iframeHint: null,
       skippedHint: false,
+      dialogCreateTemplate: false,
+      messageCreateTemplate: '',
       visibility: null,
       search: null,
       active: [],
@@ -117,6 +119,26 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     }
   },
   methods: {
+    addTemplate: function addTemplate() {
+      this.dialogCreateTemplate = false;
+      axios.post('/api/template_response/add', {
+        template_response: this.messageCreateTemplate,
+        reason_id: this.editId
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        return console.log(res);
+      })["catch"](function (err) {
+        return console.log(err);
+      })["finally"](this.messageCreateTemplate = '');
+    },
+    showFormAddTemplate: function showFormAddTemplate(item) {
+      console.log(item);
+      this.dialogCreateTemplate = true;
+      this.editId = item.id;
+    },
     showFormAddHint: function showFormAddHint() {
       this.shortHint = null;
       this.fullHint = null;
@@ -400,7 +422,16 @@ var render = function render() {
               return _vm.showFormAddReason(item);
             }
           }
-        }, [_vm._v("\n                    mdi-plus\n                ")]) : _vm._e()];
+        }, [_vm._v("\n                    mdi-plus\n                ")]) : _vm._e(), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-icon", {
+          attrs: {
+            small: ""
+          },
+          on: {
+            click: function click($event) {
+              return _vm.showFormAddTemplate(item);
+            }
+          }
+        }, [_vm._v("\n                    mdi-pencil-plus-outline\n                ")]) : _vm._e()];
       }
     }])
   })], 1), _vm._v(" "), _c("v-col", {
@@ -700,6 +731,42 @@ var render = function render() {
       type: "submit"
     }
   }, [_vm._v("\n                        Сохранить\n                    ")])], 1)], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
+    model: {
+      value: _vm.dialogCreateTemplate,
+      callback: function callback($$v) {
+        _vm.dialogCreateTemplate = $$v;
+      },
+      expression: "dialogCreateTemplate"
+    }
+  }, [_c("v-card", [_c("v-card-title", [_vm._v("Введите текст для создания шаблонного ответа")]), _vm._v(" "), _c("v-col", {
+    attrs: {
+      "md-4": ""
+    }
+  }, [_c("v-text-field", {
+    attrs: {
+      required: ""
+    },
+    model: {
+      value: _vm.messageCreateTemplate,
+      callback: function callback($$v) {
+        _vm.messageCreateTemplate = $$v;
+      },
+      expression: "messageCreateTemplate"
+    }
+  })], 1), _vm._v(" "), _c("v-card-actions", [_c("v-btn", {
+    on: {
+      click: function click($event) {
+        _vm.dialogCreateTemplate = false;
+      }
+    }
+  }, [_vm._v("Отмена")]), _vm._v(" "), _c("v-btn", {
+    attrs: {
+      color: "green"
+    },
+    on: {
+      click: _vm.addTemplate
+    }
+  }, [_vm._v("Создать")])], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
       persistent: ""
     },

@@ -49,6 +49,9 @@
                     <v-icon @click="showFormAddReason(item)" v-if="isAdmin || isManager">
                         mdi-plus
                     </v-icon>
+                    <v-icon @click="showFormAddTemplate(item)" v-if="isAdmin || isManager" small>
+                        mdi-pencil-plus-outline
+                    </v-icon>
                 </template>
             </v-treeview>
         </v-col>
@@ -273,6 +276,24 @@
             </v-card>
         </v-dialog>
         <v-dialog
+            v-model="dialogCreateTemplate"
+        >
+            <v-card>
+                <v-card-title>Введите текст для создания шаблонного ответа</v-card-title>
+                <v-col md-4>
+                    <v-text-field v-model="messageCreateTemplate"
+                                  required
+                    ></v-text-field>
+                </v-col>
+                <v-card-actions>
+                    <v-btn @click="dialogCreateTemplate = false">Отмена</v-btn>
+                    <v-btn @click="addTemplate"
+                           color="green"
+                    >Создать</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <v-dialog
             v-model="openFormAddHint"
             persistent
         >
@@ -353,6 +374,8 @@ export default {
             iframeHint: null,
             skippedHint: false,
 
+            dialogCreateTemplate: false,
+            messageCreateTemplate: '',
             visibility: null,
             search: null,
             active: [],
@@ -434,6 +457,25 @@ export default {
         },
     },
     methods: {
+        addTemplate() {
+            this.dialogCreateTemplate = false
+            axios
+                .post('/api/template_response/add', {
+                    template_response: this.messageCreateTemplate,
+                    reason_id: this.editId
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => console.log(res))
+                .catch(err => console.log(err))
+                .finally(this.messageCreateTemplate = '')
+        },
+        showFormAddTemplate(item) {
+            console.log(item)
+            this.dialogCreateTemplate = true
+            this.editId = item.id
+        },
         showFormAddHint () {
             this.shortHint = null
             this.fullHint = null
