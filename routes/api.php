@@ -35,8 +35,9 @@ Route::group([
     'middleware' => 'auth:sanctum',
     'prefix' => 'template_response'
 ], function ($router) {
-    Route::post('/get', [\App\Http\Controllers\TemplateResponseController::class, 'get']);
+    Route::post('/get_inside_ticket_massage', [\App\Http\Controllers\TemplateResponseController::class, 'get_inside_ticket_massage']);
     Route::post('/add', [\App\Http\Controllers\TemplateResponseController::class, 'add']);
+    Route::post('/get', [\App\Http\Controllers\TemplateResponseController::class, 'get']);
     Route::post('/delete', [\App\Http\Controllers\TemplateResponseController::class, 'delete']);
 });
 
@@ -100,6 +101,8 @@ Route::group([
     Route::post('/is_online', [\App\Http\Controllers\UserController::class, 'is_online']);
     Route::post('/take_tickets', [\App\Http\Controllers\UserController::class, 'take_tickets']);
     Route::post('/data', [\App\Http\Controllers\UserController::class, 'data']);
+    Route::post('/all_managers', [\App\Http\Controllers\UserController::class, 'all_managers']);
+    Route::post('/transfer_manager', [\App\Http\Controllers\UserController::class, 'transfer_manager']);
 });
 
 Route::group([

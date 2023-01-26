@@ -3,17 +3,18 @@
         <v-row style="padding-bottom: 150px;" class="message_list">
             <v-list three-line style="width: 100%">
                 <template>
-                    <div
+                    <v-row
+                        class="pa-2"
                         style="
-                        padding: 4px;
                         color: #202326;
                         justify-content: space-between;
                         align-items: flex-start;
                         display: flex;"
-                    > <div
-                        style="height: 145px;"
+                    > <v-card
+                        class="pa-2"
+                        style="width: 94%;"
                         v-if="isAdmin || isManager && ticketInfo"
-                    >
+                        >
                              Отдел продаж: {{departmentPosition}}
                         <br> Тема тикета: {{ reasonName }}
                         <br> Должность сотрудника: {{ workPosition }}
@@ -21,22 +22,15 @@
                         <br>
                         <div class="justify-content-around d-flex">
                             <div class="justify-content-around d-flex" v-for="template in templateResponses.slice(0, 5)" :key="template">
-                                <div @click="sendTemplate(template)" class="rounded mt-2 pa-2 primary white--text">
+                                <div @click="sendTemplate(template)" class="rounded ma-2 pa-2 primary white--text" style="cursor: pointer">
                                     {{ template.length > 15 ? template.slice(0,15)+'...' : template }}
                                 </div>
-                                <v-icon
-                                    class="mt-2 mr-2"
-                                    @click="templateDelete(template)"
-                                    color="red"
-                                >
-                                    mdi-close
-                                </v-icon>
                             </div>
                         </div>
-                    </div>
+                    </v-card>
                     <div></div> <!-- Этот див нужен для фиксации v-switch  -->
                         <div
-                        style="height: 20px"
+                        style="height: 30px"
                         >
                             <v-switch
                                 style="box-sizing: border-box;
@@ -49,10 +43,7 @@
                             >
                             </v-switch>
                         </div>
-                    </div>
-                    <hr class="mt-1"
-                        v-if="isAdmin || isManager && ticketInfo"
-                    >
+                    </v-row>
                 </template>
                 <template v-for="(item, index) in items">
                     <v-list-item :key="index"
@@ -570,17 +561,6 @@ export default {
             this.message = item
             this.sendMessage()
         },
-        templateDelete(template) {
-            axios
-                .post('/api/template_response/delete', {data: template}, {
-                    headers: {
-                        Authorization: 'Bearer '+this.currentToken
-                    }
-                }). then(res => {
-                    this.templateResponses = this.templateResponses.filter(item => item !== template)
-                })
-                .catch(err => console.log(err))
-        },
         addFile(event) {
             this.isFileUploading = true
             let file = event
@@ -658,7 +638,7 @@ export default {
         },
         getTemplates() {
             axios
-                .post('/api/template_response/get', {
+                .post('/api/template_response/get_inside_ticket_massage', {
                     ticket_id: this.ticket_id
                 }, {
                     headers: {

@@ -30,7 +30,6 @@
                 >
                     <v-icon
                         @click="openMessage(item)"
-                        color="primary"
                     >
                         mdi-message-text
                     </v-icon>
@@ -52,14 +51,19 @@
                     class="ml-2"
                     @click="openCouponForm(item)"
                     v-else
-                    color="orange"
                 >
                     mdi-ticket
                 </v-icon>
                 <v-icon
+                    @click="getAllManagers(item)"
+                    class="ml-2"
+                    v-if="isAdmin || isManager"
+                >
+                    mdi-account-switch
+                </v-icon>
+                <v-icon
                     class="ml-2"
                     @click="toArchive(item)"
-                    color="red"
                 >
                     mdi-delete
                 </v-icon>
@@ -87,7 +91,7 @@
                         color="red"
                         dark
                         :loading="transferingToArchive"
-                        @click="transferToArchive"
+                        @click="transferToArchive(item)"
                     >
                         В архив
                     </v-btn>
@@ -157,6 +161,32 @@
                 </v-form>
             </v-card>
         </v-dialog>
+        <v-dialog
+            v-model="dialogForTransfer"
+            :width="500"
+        >   <v-card>
+                <v-card-title>Выберите другого сотрудника техподдержки</v-card-title>
+                <v-card>
+                    <v-select v-model="selectManager" :items="managers" :item-text="manager => manager.name + ' ' + manager.lastName" :item-value="manager => manager.lastName"
+                    :width="450"
+                    class="pa-2 ma-2"
+                    ></v-select>
+                    <v-btn
+                        class="ma-2"
+                        @click="dialogForTransfer=false"
+                    >
+                        Отменить
+                    </v-btn>
+                    <v-btn
+                        color="success"
+                        class="ma-2"
+                        @click="transferToAnotherManager"
+                    >
+                        Отправить
+                    </v-btn>
+                </v-card>
+        </v-card>
+        </v-dialog>
         <v-btn
             class="mx-2"
             fixed
@@ -196,9 +226,12 @@ export default {
             openConfirm: false,
             validCouponForm: false,
             loadingCouponForm: false,
-            // idReasons: [],
-            // nameTickets: [],
             readyWorking: false,
+            dialogForTransfer: false,
+            ticketForTransfer: null,
+            selectManager: null,
+            managers: [],
+            manager: '',
             openCoupon: false,
             couponCode: null,
             couponCodesLoading: false,
@@ -253,6 +286,35 @@ export default {
         },
     },
     methods: {
+        getAllManagers(ticket) {
+            this.dialogForTransfer = true
+            this.ticketForTransfer = ticket
+            axios
+                .post('/api/user/all_managers', {}, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => {
+                    res.data.forEach((el) => {
+                        this.managers.push({name:el.name, lastName: el.last_name})
+                    })
+                })
+                .catch(err => console.log(err))
+        },
+        transferToAnotherManager() {
+            axios
+                .post('/api/user/transfer_manager', {
+                    manager: this.selectManager,
+                    ticket: this.ticketForTransfer
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => console.log(res))
+                .catch(err => console.log(err))
+                .finally(this.dialogForTransfer = false)
+
+        },
         getDateTime(time){
             const date = new Date(time * 1000)
             return date.toLocaleString()
@@ -331,9 +393,6 @@ export default {
                 .catch(err => console.error(err))
                 .finally(() => this.transferingToArchive = false)
         },
-        // showConfirm(){
-        //     this.openConfirm = true
-        // },
         getTickets(){
                 this.loadingTickets = true
 
@@ -350,38 +409,13 @@ export default {
                             }
                             ticket.user_id = ticket.user.last_name + ' ' + ticket.user.name + ' ' + ticket.user.second_name
                             console.log(ticket)
-                            // this.nameTickets.push(ticket.name)
                             return ticket
                         })
-                        // console.log(this.nameTickets);
                     })
                     .catch(err => console.error(err))
                     .finally(() => this.loadingTickets = false)
 
         },
-
-        // getReasonId() {
-        //     axios
-        //         .post('/api/reason/get', {}, {
-        //             headers: {
-        //                 Authorization: 'Bearer '+this.currentToken
-        //             }
-        //         })
-        //         .then(resp => {
-        //             console.log(resp.data)
-        //             const result = resp.data.filter((el) => {
-        //                 for (let i = 0; i<this.nameTickets.length; i++){
-        //                     if (this.nameTickets[i] === el.name) {
-        //                         this.idReasons.push(el.id)
-        //                         return true
-        //                     }
-        //                 }
-        //                 return false
-        //             })
-        //             console.log(this.idReasons)
-        //         })
-        //         .catch(err => console.error(err))
-        // },
         setOnline(status) {
             axios
                 .post('/api/user/is_online', {
@@ -417,7 +451,6 @@ export default {
     mounted() {
         this.takeTickets()
         this.getTickets()
-        // this.getReasonId()
     }
 }
 </script>

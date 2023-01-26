@@ -104,7 +104,7 @@
 
                     <v-btn
                     v-else-if="!skippedHint && hints.length "
-                    color="green"
+                    color="success"
                     class="float-right"
                     >Ознакомьтесь с подсказкой</v-btn>
 
@@ -277,6 +277,7 @@
         </v-dialog>
         <v-dialog
             v-model="dialogCreateTemplate"
+            :width="550"
         >
             <v-card>
                 <v-card-title>Введите текст для создания шаблонного ответа</v-card-title>
@@ -286,11 +287,22 @@
                     ></v-text-field>
                 </v-col>
                 <v-card-actions>
-                    <v-btn @click="dialogCreateTemplate = false">Отмена</v-btn>
+                    <v-btn @click="closeCreateTemplate">Закрыть</v-btn>
                     <v-btn @click="addTemplate"
-                           color="green"
+                           color="success"
                     >Создать</v-btn>
                 </v-card-actions>
+                <v-card-title>Шаблонные ответы в данной теме:</v-card-title>
+                <v-card v-for="template in templateResponses.slice(0, 5)" :key="template" class="pa-2 justify-content-between d-flex">
+                    {{ template.length > 15 ? template.slice(0,15)+'...' : template }}
+                    <v-icon
+                        @click="deleteTemplate(template)"
+                        color="red"
+                        class="ml-2">
+                        mdi-close
+                    </v-icon>
+                </v-card>
+                <v-card v-if="templateResponses.length < 1" class="pa-2">В данной теме шаблонные ответы отсутствуют</v-card>
             </v-card>
         </v-dialog>
         <v-dialog
@@ -376,6 +388,7 @@ export default {
 
             dialogCreateTemplate: false,
             messageCreateTemplate: '',
+            templateResponses: [],
             visibility: null,
             search: null,
             active: [],
@@ -457,8 +470,12 @@ export default {
         },
     },
     methods: {
-        addTemplate() {
+        closeCreateTemplate() {
             this.dialogCreateTemplate = false
+            this.templateResponses = []
+            this.messageCreateTemplate = ''
+        },
+        addTemplate() {
             axios
                 .post('/api/template_response/add', {
                     template_response: this.messageCreateTemplate,
@@ -467,14 +484,50 @@ export default {
                     headers: {
                         Authorization: 'Bearer '+this.currentToken
                     }
-                }).then(res => console.log(res))
+                }).then(res => {
+                    console.log(res)
+                    this.templateResponses = []
+                    this.getTemplates()
+                    this.messageCreateTemplate = ''
+                })
                 .catch(err => console.log(err))
                 .finally(this.messageCreateTemplate = '')
         },
+        getTemplates() {
+            axios
+                .post('/api/template_response/get', {
+                    reason_id: this.editId
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => {
+                    res.data.forEach((el) => {
+                        this.templateResponses.push(el)
+                    })
+                    console.log(this.templateResponses)
+                })
+                .catch(err => console.log(err))
+        },
+        deleteTemplate(template) {
+            axios
+                .post('/api/template_response/delete', {
+                    data: template
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => {
+                let index = this.templateResponses.indexOf(template);
+                this.templateResponses.splice(index, 1);
+                console.log(res)
+                })
+                .catch(err => console.log(err))
+        },
         showFormAddTemplate(item) {
-            console.log(item)
-            this.dialogCreateTemplate = true
             this.editId = item.id
+            this.dialogCreateTemplate = true
+            this.getTemplates()
         },
         showFormAddHint () {
             this.shortHint = null

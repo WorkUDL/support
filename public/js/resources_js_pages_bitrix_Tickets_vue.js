@@ -27,9 +27,12 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       openConfirm: false,
       validCouponForm: false,
       loadingCouponForm: false,
-      // idReasons: [],
-      // nameTickets: [],
       readyWorking: false,
+      dialogForTransfer: false,
+      ticketForTransfer: null,
+      selectManager: null,
+      managers: [],
+      manager: '',
       openCoupon: false,
       couponCode: null,
       couponCodesLoading: false,
@@ -76,6 +79,39 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     }
   }),
   methods: {
+    getAllManagers: function getAllManagers(ticket) {
+      var _this = this;
+      this.dialogForTransfer = true;
+      this.ticketForTransfer = ticket;
+      axios.post('/api/user/all_managers', {}, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        res.data.forEach(function (el) {
+          _this.managers.push({
+            name: el.name,
+            lastName: el.last_name
+          });
+        });
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    transferToAnotherManager: function transferToAnotherManager() {
+      axios.post('/api/user/transfer_manager', {
+        manager: this.selectManager,
+        ticket: this.ticketForTransfer
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        return console.log(res);
+      })["catch"](function (err) {
+        return console.log(err);
+      })["finally"](this.dialogForTransfer = false);
+    },
     getDateTime: function getDateTime(time) {
       var date = new Date(time * 1000);
       return date.toLocaleString();
@@ -89,7 +125,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       });
     },
     openCouponForm: function openCouponForm(ticket) {
-      var _this = this;
+      var _this2 = this;
       if (this.$refs.couponForm) {
         this.$refs.couponForm.reset();
       }
@@ -101,17 +137,17 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this.couponCodes = resp.data.filter(function (i) {
+        _this2.couponCodes = resp.data.filter(function (i) {
           return i.status === 1;
         });
       })["catch"](function (err) {
-        _this.$store.dispatch('notice', err.response.data.error);
+        _this2.$store.dispatch('notice', err.response.data.error);
       })["finally"](function () {
-        _this.couponCodesLoading = false;
+        _this2.couponCodesLoading = false;
       });
     },
     ApplyCoupon: function ApplyCoupon() {
-      var _this2 = this;
+      var _this3 = this;
       if (this.$refs.couponForm.validate()) {
         this.loadingCouponForm = true;
         axios.post('/api/coupon/apply', {
@@ -122,13 +158,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             Authorization: 'Bearer ' + this.currentToken
           }
         }).then(function () {
-          _this2.openCoupon = false;
-          _this2.getTickets();
-          _this2.$store.dispatch('notice', 'Купон принят');
+          _this3.openCoupon = false;
+          _this3.getTickets();
+          _this3.$store.dispatch('notice', 'Купон принят');
         })["catch"](function (err) {
-          return _this2.$store.dispatch('notice', err.response.data.error);
+          return _this3.$store.dispatch('notice', err.response.data.error);
         })["finally"](function () {
-          return _this2.loadingCouponForm = false;
+          return _this3.loadingCouponForm = false;
         });
       }
     },
@@ -137,7 +173,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       this.ticketAction = ticket.id;
     },
     transferToArchive: function transferToArchive() {
-      var _this3 = this;
+      var _this4 = this;
       this.transferingToArchive = true;
       axios.post('/api/ticket/archive', {
         id: this.ticketAction,
@@ -147,67 +183,40 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function () {
-        _this3.tickets = _this3.tickets.filter(function (t) {
-          return t.id !== _this3.ticketAction;
+        _this4.tickets = _this4.tickets.filter(function (t) {
+          return t.id !== _this4.ticketAction;
         });
-        _this3.openConfirm = false;
+        _this4.openConfirm = false;
       })["catch"](function (err) {
         return console.error(err);
       })["finally"](function () {
-        return _this3.transferingToArchive = false;
+        return _this4.transferingToArchive = false;
       });
     },
-    // showConfirm(){
-    //     this.openConfirm = true
-    // },
     getTickets: function getTickets() {
-      var _this4 = this;
+      var _this5 = this;
       this.loadingTickets = true;
       axios.post('/api/ticket/list', {}, {
         headers: {
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this4.tickets = resp.data.map(function (ticket) {
+        _this5.tickets = resp.data.map(function (ticket) {
           if (ticket.queue === null) {
             ticket.queue = 999999;
           }
           ticket.user_id = ticket.user.last_name + ' ' + ticket.user.name + ' ' + ticket.user.second_name;
           console.log(ticket);
-          // this.nameTickets.push(ticket.name)
           return ticket;
         });
-        // console.log(this.nameTickets);
       })["catch"](function (err) {
         return console.error(err);
       })["finally"](function () {
-        return _this4.loadingTickets = false;
+        return _this5.loadingTickets = false;
       });
     },
-    // getReasonId() {
-    //     axios
-    //         .post('/api/reason/get', {}, {
-    //             headers: {
-    //                 Authorization: 'Bearer '+this.currentToken
-    //             }
-    //         })
-    //         .then(resp => {
-    //             console.log(resp.data)
-    //             const result = resp.data.filter((el) => {
-    //                 for (let i = 0; i<this.nameTickets.length; i++){
-    //                     if (this.nameTickets[i] === el.name) {
-    //                         this.idReasons.push(el.id)
-    //                         return true
-    //                     }
-    //                 }
-    //                 return false
-    //             })
-    //             console.log(this.idReasons)
-    //         })
-    //         .catch(err => console.error(err))
-    // },
     setOnline: function setOnline(status) {
-      var _this5 = this;
+      var _this6 = this;
       axios.post('/api/user/is_online', {
         status: status
       }, {
@@ -215,8 +224,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this5.getTickets();
-        _this5.isOnline = status;
+        _this6.getTickets();
+        _this6.isOnline = status;
         console.log(resp);
       })["catch"](function (err) {
         return console.log(err);
@@ -239,7 +248,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   mounted: function mounted() {
     this.takeTickets();
     this.getTickets();
-    // this.getReasonId()
   }
 });
 
@@ -301,9 +309,6 @@ var render = function render() {
             overlap: ""
           }
         }, [_c("v-icon", {
-          attrs: {
-            color: "primary"
-          },
           on: {
             click: function click($event) {
               return _vm.openMessage(item);
@@ -318,19 +323,20 @@ var render = function render() {
           staticClass: "ml-2"
         }, [_vm._v("\n                mdi-ticket\n            ")]) : _c("v-icon", {
           staticClass: "ml-2",
-          attrs: {
-            color: "orange"
-          },
           on: {
             click: function click($event) {
               return _vm.openCouponForm(item);
             }
           }
-        }, [_vm._v("\n                mdi-ticket\n            ")]), _vm._v(" "), _c("v-icon", {
+        }, [_vm._v("\n                mdi-ticket\n            ")]), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-icon", {
           staticClass: "ml-2",
-          attrs: {
-            color: "red"
-          },
+          on: {
+            click: function click($event) {
+              return _vm.getAllManagers(item);
+            }
+          }
+        }, [_vm._v("\n                mdi-account-switch\n            ")]) : _vm._e(), _vm._v(" "), _c("v-icon", {
+          staticClass: "ml-2",
           on: {
             click: function click($event) {
               return _vm.toArchive(item);
@@ -369,7 +375,9 @@ var render = function render() {
       loading: _vm.transferingToArchive
     },
     on: {
-      click: _vm.transferToArchive
+      click: function click($event) {
+        return _vm.transferToArchive(_vm.item);
+      }
     }
   }, [_vm._v("\n                    В архив\n                ")])], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
@@ -449,7 +457,52 @@ var render = function render() {
       loading: _vm.loadingCouponForm,
       type: "submit"
     }
-  }, [_vm._v("\n                        Применить\n                    ")])], 1)], 1)], 1)], 1), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-btn", {
+  }, [_vm._v("\n                        Применить\n                    ")])], 1)], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
+    attrs: {
+      width: 500
+    },
+    model: {
+      value: _vm.dialogForTransfer,
+      callback: function callback($$v) {
+        _vm.dialogForTransfer = $$v;
+      },
+      expression: "dialogForTransfer"
+    }
+  }, [_c("v-card", [_c("v-card-title", [_vm._v("Выберите другого сотрудника техподдержки")]), _vm._v(" "), _c("v-card", [_c("v-select", {
+    staticClass: "pa-2 ma-2",
+    attrs: {
+      items: _vm.managers,
+      "item-text": function itemText(manager) {
+        return manager.name + " " + manager.lastName;
+      },
+      "item-value": function itemValue(manager) {
+        return manager.lastName;
+      },
+      width: 450
+    },
+    model: {
+      value: _vm.selectManager,
+      callback: function callback($$v) {
+        _vm.selectManager = $$v;
+      },
+      expression: "selectManager"
+    }
+  }), _vm._v(" "), _c("v-btn", {
+    staticClass: "ma-2",
+    on: {
+      click: function click($event) {
+        _vm.dialogForTransfer = false;
+      }
+    }
+  }, [_vm._v("\n                    Отменить\n                ")]), _vm._v(" "), _c("v-btn", {
+    staticClass: "ma-2",
+    attrs: {
+      color: "success"
+    },
+    on: {
+      click: _vm.transferToAnotherManager
+    }
+  }, [_vm._v("\n                    Отправить\n                ")])], 1)], 1)], 1), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-btn", {
     staticClass: "mx-2",
     attrs: {
       fixed: "",

@@ -33,6 +33,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       skippedHint: false,
       dialogCreateTemplate: false,
       messageCreateTemplate: '',
+      templateResponses: [],
       visibility: null,
       search: null,
       active: [],
@@ -119,8 +120,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     }
   },
   methods: {
-    addTemplate: function addTemplate() {
+    closeCreateTemplate: function closeCreateTemplate() {
       this.dialogCreateTemplate = false;
+      this.templateResponses = [];
+      this.messageCreateTemplate = '';
+    },
+    addTemplate: function addTemplate() {
+      var _this3 = this;
       axios.post('/api/template_response/add', {
         template_response: this.messageCreateTemplate,
         reason_id: this.editId
@@ -129,15 +135,51 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (res) {
-        return console.log(res);
+        console.log(res);
+        _this3.templateResponses = [];
+        _this3.getTemplates();
+        _this3.messageCreateTemplate = '';
       })["catch"](function (err) {
         return console.log(err);
       })["finally"](this.messageCreateTemplate = '');
     },
+    getTemplates: function getTemplates() {
+      var _this4 = this;
+      axios.post('/api/template_response/get', {
+        reason_id: this.editId
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        res.data.forEach(function (el) {
+          _this4.templateResponses.push(el);
+        });
+        console.log(_this4.templateResponses);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    deleteTemplate: function deleteTemplate(template) {
+      var _this5 = this;
+      axios.post('/api/template_response/delete', {
+        data: template
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        var index = _this5.templateResponses.indexOf(template);
+        _this5.templateResponses.splice(index, 1);
+        console.log(res);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
     showFormAddTemplate: function showFormAddTemplate(item) {
-      console.log(item);
-      this.dialogCreateTemplate = true;
       this.editId = item.id;
+      this.dialogCreateTemplate = true;
+      this.getTemplates();
     },
     showFormAddHint: function showFormAddHint() {
       this.shortHint = null;
@@ -158,11 +200,11 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       if (this.$refs.formAddReason) this.$refs.formAddReason.resetValidation();
     },
     buildTree: function buildTree(elements, parent_id) {
-      var _this3 = this;
+      var _this6 = this;
       var branch = [];
       elements.forEach(function (i) {
         if (i.parent_id === parent_id) {
-          var parent = _this3.buildTree(elements, i.id);
+          var parent = _this6.buildTree(elements, i.id);
           if (parent && parent.length) i.children = parent;
           branch.push(i);
         }
@@ -171,13 +213,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       return branch;
     },
     getInformation: function getInformation() {
-      var _this4 = this;
+      var _this7 = this;
       axios.post('/api/information/get', {}, {
         headers: {
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        return _this4.information = [{
+        return _this7.information = [{
           id: 0,
           name: 'Без дополнительной информации'
         }].concat(resp.data);
@@ -186,13 +228,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       });
     },
     getReason: function getReason() {
-      var _this5 = this;
+      var _this8 = this;
       axios.post('/api/reason/get', {}, {
         headers: {
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        return _this5.reasonsList = [{
+        return _this8.reasonsList = [{
           id: 0,
           name: 'Корневой каталог',
           children: []
@@ -202,7 +244,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       });
     },
     addReason: function addReason() {
-      var _this6 = this;
+      var _this9 = this;
       if (this.$refs.formAddReason.validate()) {
         this.reasonAddLoading = true;
         axios.post(this.editId === null ? '/api/reason/add' : '/api/reason/update', Object.assign({
@@ -220,18 +262,18 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             Authorization: 'Bearer ' + this.currentToken
           }
         }).then(function () {
-          _this6.$refs.formAddReason.reset();
-          _this6.newReasonDialog = false;
-          _this6.getReason();
+          _this9.$refs.formAddReason.reset();
+          _this9.newReasonDialog = false;
+          _this9.getReason();
         })["catch"](function (err) {
           return console.error(err);
         })["finally"](function () {
-          return _this6.reasonAddLoading = false;
+          return _this9.reasonAddLoading = false;
         });
       }
     },
     addTicket: function addTicket() {
-      var _this7 = this;
+      var _this10 = this;
       if (this.$refs.formTicket.validate()) {
         this.addingTicket = true;
         axios.post('/api/ticket/add', {
@@ -242,31 +284,31 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             Authorization: 'Bearer ' + this.currentToken
           }
         }).then(function (res) {
-          _this7.$router.replace({
+          _this10.$router.replace({
             name: 'bitrix-tickets'
           });
           console.log(res.data);
         })["catch"](function (err) {
-          return _this7.$store.dispatch('notice', err.response.data.error);
+          return _this10.$store.dispatch('notice', err.response.data.error);
         })["finally"](function () {
-          return _this7.addingTicket = false;
+          return _this10.addingTicket = false;
         });
       }
     },
     getHint: function getHint() {
-      var _this8 = this;
+      var _this11 = this;
       axios.post('/api/hint/get', {}, {
         headers: {
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this8.hintList = resp.data;
+        _this11.hintList = resp.data;
       })["catch"](function (err) {
         console.error(err);
       });
     },
     addHint: function addHint() {
-      var _this9 = this;
+      var _this12 = this;
       if (this.$refs.formAddHint.validate()) {
         this.addingHint = true;
         axios.post('/api/hint/add', {
@@ -279,25 +321,25 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             Authorization: 'Bearer ' + this.currentToken
           }
         }).then(function (resp) {
-          _this9.hintList.push(resp.data);
-          _this9.$refs.formAddHint.reset();
-          _this9.openFormAddHint = false;
-          _this9.skippedHint = false;
+          _this12.hintList.push(resp.data);
+          _this12.$refs.formAddHint.reset();
+          _this12.openFormAddHint = false;
+          _this12.skippedHint = false;
         })["catch"](function (err) {
           return console.error(err);
         })["finally"](function () {
-          return _this9.addingHint = false;
+          return _this12.addingHint = false;
         });
       }
     },
     getGroups: function getGroups() {
-      var _this10 = this;
+      var _this13 = this;
       axios.post('/api/group/list', {}, {
         headers: {
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        return _this10.groups = resp.data;
+        return _this13.groups = resp.data;
       })["catch"](function (err) {
         return console.error(err);
       });
@@ -508,7 +550,7 @@ var render = function render() {
   }, [_vm._v("Рекомендации не помогли")]) : !_vm.skippedHint && _vm.hints.length ? _c("v-btn", {
     staticClass: "float-right",
     attrs: {
-      color: "green"
+      color: "success"
     }
   }, [_vm._v("Ознакомьтесь с подсказкой")]) : _vm._e(), _vm._v(" "), _vm.skippedHint || !_vm.hints.length ? _c("v-card", [_c("v-card-text", [_vm.ticket_information_show || _vm.ticket_information_loading ? _c("v-textarea", {
     attrs: {
@@ -731,6 +773,9 @@ var render = function render() {
       type: "submit"
     }
   }, [_vm._v("\n                        Сохранить\n                    ")])], 1)], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
+    attrs: {
+      width: 550
+    },
     model: {
       value: _vm.dialogCreateTemplate,
       callback: function callback($$v) {
@@ -755,18 +800,33 @@ var render = function render() {
     }
   })], 1), _vm._v(" "), _c("v-card-actions", [_c("v-btn", {
     on: {
-      click: function click($event) {
-        _vm.dialogCreateTemplate = false;
-      }
+      click: _vm.closeCreateTemplate
     }
-  }, [_vm._v("Отмена")]), _vm._v(" "), _c("v-btn", {
+  }, [_vm._v("Закрыть")]), _vm._v(" "), _c("v-btn", {
     attrs: {
-      color: "green"
+      color: "success"
     },
     on: {
       click: _vm.addTemplate
     }
-  }, [_vm._v("Создать")])], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
+  }, [_vm._v("Создать")])], 1), _vm._v(" "), _c("v-card-title", [_vm._v("Шаблонные ответы в данной теме:")]), _vm._v(" "), _vm._l(_vm.templateResponses.slice(0, 5), function (template) {
+    return _c("v-card", {
+      key: template,
+      staticClass: "pa-2 justify-content-between d-flex"
+    }, [_vm._v("\n                " + _vm._s(template.length > 15 ? template.slice(0, 15) + "..." : template) + "\n                "), _c("v-icon", {
+      staticClass: "ml-2",
+      attrs: {
+        color: "red"
+      },
+      on: {
+        click: function click($event) {
+          return _vm.deleteTemplate(template);
+        }
+      }
+    }, [_vm._v("\n                    mdi-close\n                ")])], 1);
+  }), _vm._v(" "), _vm.templateResponses.length < 1 ? _c("v-card", {
+    staticClass: "pa-2"
+  }, [_vm._v("В данной теме шаблонные ответы отсутствуют")]) : _vm._e()], 2)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
       persistent: ""
     },
