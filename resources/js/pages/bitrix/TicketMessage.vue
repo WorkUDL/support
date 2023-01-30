@@ -113,6 +113,7 @@
                             top: -25px;">
                                 <v-file-input
                                     @change="addFile"
+                                    @paste.prevent="addFile"
                                     v-model="file"
                                     ref="fileInput"
                                     class="mb-9"
@@ -562,6 +563,7 @@ export default {
             this.sendMessage()
         },
         addFile(event) {
+            console.log(event)
             this.isFileUploading = true
             let file = event
             let data = new FormData();
@@ -579,6 +581,9 @@ export default {
                 this.isFileUploading = false
                 console.log(err)
             }).finally(this.file = null)
+        },
+        async imagePaste() {
+
         },
         getFiles(){
             axios
@@ -735,7 +740,7 @@ export default {
         this.getReasonName()
         this.dataOfCreator()
         this.getTemplates()
-
+        this.imagePaste()
 
         this.$socket.emit('messages', {
             ticket_id: this.ticket_id

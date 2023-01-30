@@ -304,6 +304,7 @@ export default {
         transferToAnotherManager() {
             axios
                 .post('/api/user/transfer_manager', {
+                    user_id: this.currentUser.id,
                     manager: this.selectManager,
                     ticket: this.ticketForTransfer
                 }, {

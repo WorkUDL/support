@@ -100,6 +100,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     transferToAnotherManager: function transferToAnotherManager() {
       axios.post('/api/user/transfer_manager', {
+        user_id: this.currentUser.id,
         manager: this.selectManager,
         ticket: this.ticketForTransfer
       }, {
