@@ -28,6 +28,7 @@ class User extends Authenticatable
         'is_manager',
         'work_position',
         'department',
+        'online'
     ];
 
     /**

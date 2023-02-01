@@ -108,6 +108,8 @@ class TicketController extends Controller
 
     public function add(Request $request)
     {
+        dump($request);
+
         $reason = Reason::query()->find($request->reason_id);
 
         if(is_null($reason)){
@@ -161,12 +163,26 @@ class TicketController extends Controller
     private function create($manager, $request): bool
     {
 
-        $ticket = Ticket::query()->create([
-            'user_id' => Auth::id(),
-            'manager_id' => 4,
-            'reason_id' => $request->reason_id,
-            'active' => 1
-        ]);
+        if($manager->online === 1) {
+            $ticket = Ticket::query()->create([
+                'user_id' => Auth::id(),
+                'manager_id' => $manager->id,
+                'reason_id' => $request->reason_id,
+                'active' => 1
+            ]);
+
+            Http::post(CRest::WEBHOOK.'/im.message.add', [
+                'DIALOG_ID' => $manager->bitrix_id,
+                'MESSAGE' => 'Новый тикет: [URL=/marketplace/view/120/?params[ticket_id]='.$ticket->id.']#'.$ticket->id.'[/URL]'
+            ]);
+        } else {
+            $ticket = Ticket::query()->create([
+                'user_id' => Auth::id(),
+                'manager_id' => 4,
+                'reason_id' => $request->reason_id,
+                'active' => 1
+            ]);
+        }
 
         Participant::query()->create([
             'ticket_id' => $ticket->id,
@@ -183,11 +199,6 @@ class TicketController extends Controller
             'user_id' => Auth::id(),
             'ticket_id' => $ticket->id,
             'message_id' => $message->id
-        ]);
-
-        Http::post(CRest::WEBHOOK.'/im.message.add', [
-            'DIALOG_ID' => $manager->bitrix_id,
-            'MESSAGE' => 'Новый тикет: [URL=/marketplace/view/120/?params[ticket_id]='.$ticket->id.']#'.$ticket->id.'[/URL]'
         ]);
 
         return true;
