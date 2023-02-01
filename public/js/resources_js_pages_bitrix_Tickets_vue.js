@@ -81,6 +81,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   methods: {
     getAllManagers: function getAllManagers(ticket) {
       var _this = this;
+      console.log(ticket);
       this.dialogForTransfer = true;
       this.ticketForTransfer = ticket;
       axios.post('/api/user/all_managers', {}, {

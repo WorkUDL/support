@@ -77,4 +77,22 @@ class UserController extends Controller
             ]);
 
     }
+
+    public function transfer_manager_inside_dialog(Request $request)
+    {
+        $giving_manager = User::where('id', $request->user_id)->first();
+        $host_manager = User::where('last_name', $request->manager)->first();
+        $ticket = $request->ticket;
+
+
+        Ticket::find($ticket['ticket_id'])->update([
+            'manager_id' => $host_manager->id
+        ]);
+
+        return Http::post(CRest::WEBHOOK.'/im.message.add', [
+            'DIALOG_ID' => $host_manager->bitrix_id,
+            'MESSAGE' => $giving_manager->name.' '.$giving_manager->last_name. ' передал Вам тикет [URL=/marketplace/view/120/?params[ticket_id]='.$ticket['ticket_id'].']#'.$ticket['ticket_id'].'[/URL]'
+        ]);
+
+    }
 }

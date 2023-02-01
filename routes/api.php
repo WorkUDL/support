@@ -103,6 +103,7 @@ Route::group([
     Route::post('/data', [\App\Http\Controllers\UserController::class, 'data']);
     Route::post('/all_managers', [\App\Http\Controllers\UserController::class, 'all_managers']);
     Route::post('/transfer_manager', [\App\Http\Controllers\UserController::class, 'transfer_manager']);
+    Route::post('/transfer_manager_inside_dialog', [\App\Http\Controllers\UserController::class, 'transfer_manager_inside_dialog']);
 });
 
 Route::group([

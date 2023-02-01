@@ -287,6 +287,7 @@ export default {
     },
     methods: {
         getAllManagers(ticket) {
+            console.log(ticket)
             this.dialogForTransfer = true
             this.ticketForTransfer = ticket
             axios
@@ -314,7 +315,6 @@ export default {
                 }).then(res => console.log(res))
                 .catch(err => console.log(err))
                 .finally(this.dialogForTransfer = false)
-
         },
         getDateTime(time){
             const date = new Date(time * 1000)

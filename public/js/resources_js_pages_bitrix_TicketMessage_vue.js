@@ -17,9 +17,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var bitrix24_vue__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(bitrix24_vue__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _Tickets_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Tickets.vue */ "./resources/js/pages/bitrix/Tickets.vue");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) }), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; defineProperty(this, "_invoke", { value: function value(method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; } function maybeInvokeDelegate(delegate, context) { var methodName = context.method, method = delegate.iterator[methodName]; if (undefined === method) return context.delegate = null, "throw" === methodName && delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel; var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) { if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; } return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), defineProperty(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (val) { var object = Object(val), keys = []; for (var key in object) { keys.push(key); } return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) { "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); } }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, "catch": function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -45,6 +42,11 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       openDialog: false,
       dialogImg: false,
       currentImg: null,
+      dialogForTransfer: false,
+      ticketForTransfer: null,
+      selectManager: null,
+      managers: [],
+      manager: '',
       reasonId: '',
       reasonName: '',
       loadingParticipants: false,
@@ -88,6 +90,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   }),
   watch: {
     items: function items(newVal) {
+      var _this = this;
       this.scrollToElement();
       axios.post('/api/message_read/read', {
         ticket_id: this.ticket_id,
@@ -97,7 +100,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        return console.log(resp.data);
+        _this.ticketForTransfer = resp.data;
+        console.log(resp.data);
       })["catch"](function (err) {
         return console.error(err);
       });
@@ -129,7 +133,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       }, 10);
     },
     getMessages: function getMessages() {
-      var _this = this;
+      var _this2 = this;
       axios.post('/api/message/get', {
         ticket_id: this.ticket_id
       }, {
@@ -137,7 +141,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this.items = resp.data.map(function (item) {
+        _this2.items = resp.data.map(function (item) {
           return {
             id: item.id,
             photo: item.photo,
@@ -151,15 +155,15 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             date: item.date
           };
         });
-        _this.getFiles();
+        _this2.getFiles();
       })["catch"](function () {
-        return _this.$router.replace({
+        return _this2.$router.replace({
           name: 'bitrix-tickets'
         });
       });
     },
     getParticipants: function getParticipants() {
-      var _this2 = this;
+      var _this3 = this;
       this.loadingParticipants = true;
       axios.post('/api/participant/list', {
         ticket_id: this.ticket_id
@@ -168,16 +172,16 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this2.participants = resp.data;
-        _this2.showParticipants = true;
+        _this3.participants = resp.data;
+        _this3.showParticipants = true;
       })["catch"](function (err) {
-        return _this2.$store.dispatch('notice', err.response.data.error);
+        return _this3.$store.dispatch('notice', err.response.data.error);
       })["finally"](function () {
-        return _this2.loadingParticipants = false;
+        return _this3.loadingParticipants = false;
       });
     },
     addParticipants: function addParticipants() {
-      var _this3 = this;
+      var _this4 = this;
       if (this.$refs.newParticipantForm.validate()) {
         this.newParticipantFormLoading = true;
         axios.post('/api/participant/add', {
@@ -188,17 +192,17 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             Authorization: 'Bearer ' + this.currentToken
           }
         }).then(function () {
-          _this3.newParticipantForm = false;
-          _this3.getParticipants();
+          _this4.newParticipantForm = false;
+          _this4.getParticipants();
         })["catch"](function (err) {
-          return _this3.$store.dispatch('notice', err.response.data.error);
+          return _this4.$store.dispatch('notice', err.response.data.error);
         })["finally"](function () {
-          return _this3.newParticipantFormLoading = false;
+          return _this4.newParticipantFormLoading = false;
         });
       }
     },
     sendMessage: function sendMessage() {
-      var _this4 = this;
+      var _this5 = this;
       this.sendingMessage = true;
       axios.post('/api/message/add', {
         ticket_id: this.ticket_id,
@@ -208,11 +212,11 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function () {
-        return _this4.message = null;
+        return _this5.message = null;
       })["catch"](function (err) {
         return console.error(err);
       })["finally"](function () {
-        return _this4.sendingMessage = false;
+        return _this5.sendingMessage = false;
       });
     },
     sendTemplate: function sendTemplate(item) {
@@ -220,7 +224,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       this.sendMessage();
     },
     addFile: function addFile(event) {
-      var _this5 = this;
+      var _this6 = this;
       console.log(event);
       this.isFileUploading = true;
       var file = event;
@@ -232,28 +236,15 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this5.isFileUploading = false;
-        _this5.file = resp.data.body;
+        _this6.isFileUploading = false;
+        _this6.file = resp.data.body;
       })["catch"](function (err) {
-        _this5.isFileUploading = false;
+        _this6.isFileUploading = false;
         console.log(err);
       })["finally"](this.file = null);
     },
-    imagePaste: function imagePaste() {
-      return _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-        return _regeneratorRuntime().wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee);
-      }))();
-    },
     getFiles: function getFiles() {
-      var _this6 = this;
+      var _this7 = this;
       axios.post('/api/file/get', {
         ticket_id: this.ticket_id
       }, {
@@ -261,13 +252,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {})["catch"](function () {
-        return _this6.$router.replace({
+        return _this7.$router.replace({
           name: 'bitrix-tickets'
         });
       });
     },
     getTicket: function getTicket() {
-      var _this7 = this;
+      var _this8 = this;
       axios.post('/api/ticket/get', {
         id: this.ticket_id
       }, {
@@ -275,13 +266,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this7.reasonId = resp.data.reason_id;
-        console.log(_this7.reasonId);
-        _this7.active = resp.data.active;
+        _this8.reasonId = resp.data.reason_id;
+        console.log(_this8.reasonId);
+        _this8.active = resp.data.active;
       })["catch"](function (err) {
         return console.error(err);
       })["finally"](function () {
-        return _this7.sendingMessage = false;
+        return _this8.sendingMessage = false;
       });
     },
     getUser: function getUser(item) {
@@ -291,7 +282,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       return user ? user.name : item.user_id;
     },
     getReasonName: function getReasonName() {
-      var _this8 = this;
+      var _this9 = this;
       axios.post('/api/reason/get', {
         id: this.reasonId
       }, {
@@ -301,17 +292,17 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       }).then(function (resp) {
         var reasonsList = resp.data; // Список проблем
         var result = reasonsList.filter(function (el) {
-          if (_this8.reasonId === el.id) {
+          if (_this9.reasonId === el.id) {
             return el.name;
           }
         });
-        _this8.reasonName = result[0].name;
+        _this9.reasonName = result[0].name;
       })["catch"](function (err) {
         return console.error(err);
       });
     },
     getTemplates: function getTemplates() {
-      var _this9 = this;
+      var _this10 = this;
       axios.post('/api/template_response/get_inside_ticket_massage', {
         ticket_id: this.ticket_id
       }, {
@@ -320,15 +311,15 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         }
       }).then(function (res) {
         var temp = res.data.map(function (el) {
-          _this9.templateResponses.push(el.template_response);
+          _this10.templateResponses.push(el.template_response);
         });
-        console.log(_this9.templateResponses);
+        console.log(_this10.templateResponses);
       })["catch"](function (err) {
         return console.log(err);
       });
     },
     dataOfCreator: function dataOfCreator() {
-      var _this10 = this;
+      var _this11 = this;
       axios.post('/api/user/data', {
         id: this.ticket_id
       }, {
@@ -336,7 +327,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (resp) {
-        _this10.userCreatedTicket = resp.data;
+        _this11.userCreatedTicket = resp.data;
         BX24.callBatch({
           get_user: {
             method: 'user.get',
@@ -359,8 +350,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             str += i === 0 ? '' : ', ';
             str += result.get_department.data()[i].NAME;
           }
-          _this10.departmentPosition = str;
-          _this10.workPosition = wrk;
+          _this11.departmentPosition = str;
+          _this11.workPosition = wrk;
         });
       })["catch"](function (err) {
         return console.log(err);
@@ -370,7 +361,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       this.openDialog = true;
     },
     toArchive: function toArchive() {
-      var _this11 = this;
+      var _this12 = this;
       this.archive = true;
       axios.post('/api/ticket/archive', {
         id: this.ticket_id,
@@ -380,13 +371,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function () {
-        _this11.openDialog = false;
+        _this12.openDialog = false;
         console.log('Тикет отправлен в архив');
       })["catch"](function (err) {
         return console.error(err);
       })["finally"](function () {
-        _this11.archive = false;
-        _this11.$router.push({
+        _this12.archive = false;
+        _this12.$router.push({
           name: 'bitrix-tickets'
         });
       });
@@ -399,6 +390,39 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       if (ticketInfo) {
         this.ticketInfo = ticketInfo === 'true';
       }
+    },
+    transferToAnotherManager: function transferToAnotherManager() {
+      axios.post('/api/user/transfer_manager_inside_dialog', {
+        user_id: this.currentUser.id,
+        manager: this.selectManager,
+        ticket: this.ticketForTransfer
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        return console.log(res);
+      })["catch"](function (err) {
+        return console.log(err);
+      })["finally"](this.dialogForTransfer = false);
+    },
+    getAllManagers: function getAllManagers() {
+      var _this13 = this;
+      this.dialogForTransfer = true;
+      axios.post('/api/user/all_managers', {}, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        res.data.forEach(function (el) {
+          _this13.managers.push({
+            name: el.name,
+            lastName: el.last_name
+          });
+        });
+      })["catch"](function (err) {
+        return console.log(err);
+      });
     }
   },
   mounted: function mounted() {
@@ -508,6 +532,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   methods: {
     getAllManagers: function getAllManagers(ticket) {
       var _this = this;
+      console.log(ticket);
       this.dialogForTransfer = true;
       this.ticketForTransfer = ticket;
       axios.post('/api/user/all_managers', {}, {
@@ -1013,7 +1038,20 @@ var render = function render() {
           attrs: {
             color: "white"
           }
-        }, [_vm._v("\n                                        mdi-account-supervisor\n                                    ")])], 1)], 1)], 1), _vm._v(" "), _c("v-btn", {
+        }, [_vm._v("\n                                        mdi-account-supervisor\n                                    ")])], 1), _vm._v(" "), _c("v-btn", {
+          attrs: {
+            small: "",
+            fab: "",
+            color: "success"
+          },
+          on: {
+            click: _vm.getAllManagers
+          }
+        }, [_c("v-icon", {
+          attrs: {
+            color: "white"
+          }
+        }, [_vm._v("\n                                        mdi-account-switch\n                                    ")])], 1)], 1)], 1), _vm._v(" "), _c("v-btn", {
           staticClass: "mx-2",
           staticStyle: {
             bottom: "10px",
@@ -1037,7 +1075,7 @@ var render = function render() {
         }, [_vm._v("\n                                mdi-send\n                            ")])], 1)];
       },
       proxy: true
-    }], null, false, 1276611727),
+    }], null, false, 130455134),
     model: {
       value: _vm.message,
       callback: function callback($$v) {
@@ -1046,6 +1084,51 @@ var render = function render() {
       expression: "message"
     }
   })], 1)], 1)], 1) : _vm._e(), _vm._v(" "), _c("v-dialog", {
+    attrs: {
+      width: 500
+    },
+    model: {
+      value: _vm.dialogForTransfer,
+      callback: function callback($$v) {
+        _vm.dialogForTransfer = $$v;
+      },
+      expression: "dialogForTransfer"
+    }
+  }, [_c("v-card", [_c("v-card-title", [_vm._v("Выберите другого сотрудника техподдержки")]), _vm._v(" "), _c("v-card", [_c("v-select", {
+    staticClass: "pa-2 ma-2",
+    attrs: {
+      items: _vm.managers,
+      "item-text": function itemText(manager) {
+        return manager.name + " " + manager.lastName;
+      },
+      "item-value": function itemValue(manager) {
+        return manager.lastName;
+      },
+      width: 450
+    },
+    model: {
+      value: _vm.selectManager,
+      callback: function callback($$v) {
+        _vm.selectManager = $$v;
+      },
+      expression: "selectManager"
+    }
+  }), _vm._v(" "), _c("v-btn", {
+    staticClass: "ma-2",
+    on: {
+      click: function click($event) {
+        _vm.dialogForTransfer = false;
+      }
+    }
+  }, [_vm._v("\n                Отменить\n            ")]), _vm._v(" "), _c("v-btn", {
+    staticClass: "ma-2",
+    attrs: {
+      color: "success"
+    },
+    on: {
+      click: _vm.transferToAnotherManager
+    }
+  }, [_vm._v("\n                Отправить\n            ")])], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
       "max-width": "600px"
     },

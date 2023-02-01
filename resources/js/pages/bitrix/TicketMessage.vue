@@ -166,6 +166,18 @@
                                             mdi-account-supervisor
                                         </v-icon>
                                     </v-btn>
+                                    <v-btn
+                                    @click="getAllManagers"
+                                    small
+                                    fab
+                                    color="success"
+                                    >
+                                        <v-icon
+                                        color="white"
+                                        >
+                                            mdi-account-switch
+                                        </v-icon>
+                                    </v-btn>
                                 </v-speed-dial>
                             </div>
                             <v-btn
@@ -188,6 +200,32 @@
                 </v-card>
             </v-col>
         </v-row>
+        <v-dialog
+            v-model="dialogForTransfer"
+            :width="500"
+        >   <v-card>
+            <v-card-title>Выберите другого сотрудника техподдержки</v-card-title>
+            <v-card>
+                <v-select v-model="selectManager" :items="managers" :item-text="manager => manager.name + ' ' + manager.lastName" :item-value="manager => manager.lastName"
+                          :width="450"
+                          class="pa-2 ma-2"
+                ></v-select>
+                <v-btn
+                    class="ma-2"
+                    @click="dialogForTransfer=false"
+                >
+                    Отменить
+                </v-btn>
+                <v-btn
+                    color="success"
+                    class="ma-2"
+                    @click="transferToAnotherManager"
+                >
+                    Отправить
+                </v-btn>
+            </v-card>
+        </v-card>
+        </v-dialog>
         <v-dialog
             v-model="showParticipants"
             max-width="600px"
@@ -380,6 +418,11 @@ export default {
             openDialog: false,
             dialogImg: false,
             currentImg: null,
+            dialogForTransfer: false,
+            ticketForTransfer: null,
+            selectManager: null,
+            managers: [],
+            manager: '',
             reasonId: '',
             reasonName: '',
             loadingParticipants: false,
@@ -443,7 +486,10 @@ export default {
                         Authorization: 'Bearer '+this.currentToken
                     }
                 })
-                .then(resp => console.log(resp.data))
+                .then(resp => {
+                    this.ticketForTransfer = resp.data
+                    console.log(resp.data)
+                })
                 .catch(err => console.error(err))
         },
         newParticipantForm(){
@@ -581,9 +627,6 @@ export default {
                 this.isFileUploading = false
                 console.log(err)
             }).finally(this.file = null)
-        },
-        async imagePaste() {
-
         },
         getFiles(){
             axios
@@ -730,6 +773,34 @@ export default {
             if (ticketInfo) {
                 this.ticketInfo = (ticketInfo === 'true');
             }
+        },
+        transferToAnotherManager() {
+            axios
+                .post('/api/user/transfer_manager_inside_dialog', {
+                    user_id: this.currentUser.id,
+                    manager: this.selectManager,
+                    ticket: this.ticketForTransfer
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => console.log(res))
+                .catch(err => console.log(err))
+                .finally(this.dialogForTransfer = false)
+        },
+        getAllManagers() {
+            this.dialogForTransfer = true
+            axios
+                .post('/api/user/all_managers', {}, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => {
+                res.data.forEach((el) => {
+                    this.managers.push({name:el.name, lastName: el.last_name})
+                })
+            })
+                .catch(err => console.log(err))
         },
     },
 
