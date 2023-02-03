@@ -54,11 +54,12 @@
                                 <div></div>
                                 <div class="font-weight-bold">{{ item.last_name }} {{ item.name }} {{ item.second_name }}</div>
                                 <div class="pre" v-if="!item.message.includes('/storage/files/')"> {{ item.message }} </div>
-                                <div class="pre" v-if="item.message && item.message.includes('/storage/files/')"> <img :src="item.message"
-                                                       style="width: 250px;
-                                                       height: 200px;
-                                                       cursor: pointer;"
-                                                       @click="dialogImg = true; currentImg = item.message">
+                                <div class="pre" v-if="item.message && item.message.includes('/storage/files/')">
+                                    <img :src="item.message"
+                                         style="width: 250px;
+                                         height: 200px;
+                                         cursor: pointer;"
+                                         @click="dialogImg = true; currentImg = item.message">
                                 </div>
                             </v-list-item-title>
                             <v-list-item-subtitle>
@@ -385,9 +386,10 @@
         <template>
             <v-dialog v-model="dialogImg" max-width="1000">
                 <v-card>
-                    <v-img :src="currentImg"></v-img>
+                    <v-img href="#" :src="currentImg"></v-img>
                     <v-card-actions>
                         <v-btn color="primary" text @click="dialogImg = false">Закрыть</v-btn>
+                        <v-btn color="primary" text @click="dialogImg = false"> <a :href="currentImg" download style="text-decoration: none">Скачать изображение</a> </v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -609,24 +611,28 @@ export default {
             this.sendMessage()
         },
         addFile(event) {
-            console.log(event)
-            this.isFileUploading = true
-            let file = event
-            let data = new FormData();
-            data.append('file', file);
-            data.append('ticket_id', this.ticket_id);
-            axios
-                .post('/api/message/add', data, {
-                    headers: {
-                        Authorization: 'Bearer '+this.currentToken
-                    }
-                }).then(resp => {
-                this.isFileUploading = false
-                this.file = resp.data.body
-            }).catch(err => {
-                this.isFileUploading = false
-                console.log(err)
-            }).finally(this.file = null)
+            if (event.type.includes('image') !== true){
+                alert('Вы можете добавлять только изображения')
+            } else {
+                console.log(event)
+                this.isFileUploading = true
+                let file = event
+                let data = new FormData();
+                data.append('file', file);
+                data.append('ticket_id', this.ticket_id);
+                axios
+                    .post('/api/message/add', data, {
+                        headers: {
+                            Authorization: 'Bearer '+this.currentToken
+                        }
+                    }).then(resp => {
+                    this.isFileUploading = false
+                    this.file = resp.data.body
+                }).catch(err => {
+                    this.isFileUploading = false
+                    console.log(err)
+                }).finally(this.file = null)
+            }
         },
         getFiles(){
             axios
@@ -642,6 +648,7 @@ export default {
                     name: 'bitrix-tickets'
                 }))
         },
+
         getTicket(){
             axios
                 .post('/api/ticket/get', {
@@ -811,7 +818,6 @@ export default {
         this.getReasonName()
         this.dataOfCreator()
         this.getTemplates()
-        this.imagePaste()
 
         this.$socket.emit('messages', {
             ticket_id: this.ticket_id

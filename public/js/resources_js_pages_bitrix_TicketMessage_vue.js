@@ -225,23 +225,27 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     addFile: function addFile(event) {
       var _this6 = this;
-      console.log(event);
-      this.isFileUploading = true;
-      var file = event;
-      var data = new FormData();
-      data.append('file', file);
-      data.append('ticket_id', this.ticket_id);
-      axios.post('/api/message/add', data, {
-        headers: {
-          Authorization: 'Bearer ' + this.currentToken
-        }
-      }).then(function (resp) {
-        _this6.isFileUploading = false;
-        _this6.file = resp.data.body;
-      })["catch"](function (err) {
-        _this6.isFileUploading = false;
-        console.log(err);
-      })["finally"](this.file = null);
+      if (event.type.includes('image') !== true) {
+        alert('Вы можете добавлять только изображения');
+      } else {
+        console.log(event);
+        this.isFileUploading = true;
+        var file = event;
+        var data = new FormData();
+        data.append('file', file);
+        data.append('ticket_id', this.ticket_id);
+        axios.post('/api/message/add', data, {
+          headers: {
+            Authorization: 'Bearer ' + this.currentToken
+          }
+        }).then(function (resp) {
+          _this6.isFileUploading = false;
+          _this6.file = resp.data.body;
+        })["catch"](function (err) {
+          _this6.isFileUploading = false;
+          console.log(err);
+        })["finally"](this.file = null);
+      }
     },
     getFiles: function getFiles() {
       var _this7 = this;
@@ -432,7 +436,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     this.getReasonName();
     this.dataOfCreator();
     this.getTemplates();
-    this.imagePaste();
     this.$socket.emit('messages', {
       ticket_id: this.ticket_id
     }, function (response) {
@@ -1348,6 +1351,7 @@ var render = function render() {
     }
   }, [_c("v-card", [_c("v-img", {
     attrs: {
+      href: "#",
       src: _vm.currentImg
     }
   }), _vm._v(" "), _c("v-card-actions", [_c("v-btn", {
@@ -1360,7 +1364,25 @@ var render = function render() {
         _vm.dialogImg = false;
       }
     }
-  }, [_vm._v("Закрыть")])], 1)], 1)], 1)]], 2);
+  }, [_vm._v("Закрыть")]), _vm._v(" "), _c("v-btn", {
+    attrs: {
+      color: "primary",
+      text: ""
+    },
+    on: {
+      click: function click($event) {
+        _vm.dialogImg = false;
+      }
+    }
+  }, [_c("a", {
+    staticStyle: {
+      "text-decoration": "none"
+    },
+    attrs: {
+      href: _vm.currentImg,
+      download: ""
+    }
+  }, [_vm._v("Скачать изображение")])])], 1)], 1)], 1)]], 2);
 };
 var staticRenderFns = [];
 render._withStripped = true;

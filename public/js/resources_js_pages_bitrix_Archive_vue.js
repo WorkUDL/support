@@ -127,9 +127,6 @@ var render = function render() {
             overlap: ""
           }
         }, [_c("v-icon", {
-          attrs: {
-            color: "primary"
-          },
           on: {
             click: function click($event) {
               return _vm.openMessage(item);

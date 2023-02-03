@@ -23,7 +23,6 @@
                 >
                     <v-icon
                         @click="openMessage(item)"
-                        color="primary"
                     >
                         mdi-message-text
                     </v-icon>

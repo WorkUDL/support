@@ -7,6 +7,7 @@ use App\Models\Message;
 use App\Models\Participant;
 use App\Models\Ticket;
 use App\Models\User;
+use Faker\Core\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
