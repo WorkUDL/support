@@ -293,8 +293,8 @@
                     >Создать</v-btn>
                 </v-card-actions>
                 <v-card-title>Шаблонные ответы в данной теме:</v-card-title>
-                <v-card v-for="template in templateResponses.slice(0, 5)" :key="template" class="pa-2 justify-content-between d-flex">
-                    {{ template.length > 15 ? template.slice(0,15)+'...' : template }}
+                <v-card v-for="template in templateResponses" :key="template" class="pa-2 justify-content-between d-flex">
+                    {{ template.length > 25 ? template.slice(0,25)+'...' : template }}
                     <v-icon
                         @click="deleteTemplate(template)"
                         color="red"
@@ -345,6 +345,12 @@
                                 clear-icon="mdi-close-circle"
                                 label="Подробное описание действий"
                             />
+                        </v-col>
+                        <v-col cols="12">
+                            <v-card-title> Прикрепите изображения </v-card-title>
+                            <v-file-input>
+
+                            </v-file-input>
                         </v-col>
                     </v-row>
                     <v-card-actions>
@@ -431,12 +437,10 @@ export default {
                 : this.buildTree(this.reasonsList, 0)
         },
         hints(){
+            console.log(this.hintList)
             this.openedHint = this.hintList.filter(h => h.reason_id === this.reasonsActive.id).length === 1 ? [0] : []
             return this.hintList.filter(h => h.reason_id === this.reasonsActive.id)
         },
-        iframe(item){
-            console.log(item)
-        }
     },
     watch: {
         active(newVal){
@@ -662,7 +666,7 @@ export default {
                     .post('/api/hint/add', {
                         short: this.shortHint,
                         full: this.fullHint,
-                        iframe: this.iframeHint,
+                        iframeHint: this.iframeHint,
                         reason_id: this.reasonsActive.id
                     }, {
                         headers: {
@@ -695,7 +699,6 @@ export default {
         this.getHint()
         this.getGroups()
         this.getInformation()
-        this.iframe()
     }
 }
 </script>

@@ -19,14 +19,6 @@
                         <br> Тема тикета: {{ reasonName }}
                         <br> Должность сотрудника: {{ workPosition }}
                         <br> б24.юдл.рф/company/personal/user/{{ userCreatedTicket }}/
-                        <br>
-                        <div class="justify-content-around d-flex">
-                            <div class="justify-content-around d-flex" v-for="template in templateResponses.slice(0, 5)" :key="template">
-                                <div @click="sendTemplate(template)" class="rounded ma-2 pa-2 primary white--text" style="cursor: pointer">
-                                    {{ template.length > 15 ? template.slice(0,15)+'...' : template }}
-                                </div>
-                            </div>
-                        </div>
                     </v-card>
                     <div></div> <!-- Этот див нужен для фиксации v-switch  -->
                         <div
@@ -98,6 +90,17 @@
         </v-row>
         <v-row class="sticky-bottom" v-if="active">
             <v-col>
+                <v-card class="justify-content-around d-flex" style="width: fit-content;">
+                    <div class="justify-content-around d-flex" v-for="template in searchTemplateResponse(message, templateResponses).slice(0, 5)" :key="template" >
+                        <div v-show="message !== ''" v-if="template.startsWith(message) || message === ''" v-model="message"
+                             @click="sendTemplate(template)"
+                             class="rounded ma-2 pa-2 primary white--text"
+                             style="cursor: pointer; display: inline-block;
+                            width: fit-content;">
+                            {{ template.length > 35 ? template.slice(0,35)+'...' : template }}
+                        </div>
+                    </div>
+                </v-card>
                 <v-card style="padding: 12px 12px 0 12px">
                     <v-textarea
                         v-model="message"
@@ -473,6 +476,9 @@ export default {
         ...mapState(['currentToken', 'currentUser', 'isManager', 'isAdmin', 'users']),
         empty(){
             return this.message === null || this.message.replace(/(\r\n|\n|\r)/gm, '').length === 0
+        },
+        filteredTemplates() {
+            return this.templateResponses.filter(template => template.slice(0, 3) === this.message.slice(0, 3));
         }
     },
     watch: {
@@ -606,9 +612,12 @@ export default {
                 .catch(err => console.error(err))
                 .finally(() => this.sendingMessage = false)
         },
-        sendTemplate(item) {
-            this.message = item
+        sendTemplate(template) {
+            this.message = template
             this.sendMessage()
+        },
+        searchTemplateResponse(message, templateResponses) {
+            return templateResponses.filter(response => response.includes(message));
         },
         addFile(event) {
             if (event.type.includes('image') !== true){

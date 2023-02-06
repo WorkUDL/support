@@ -19,7 +19,7 @@ class HintController extends Controller
             'user_id' => Auth::id(),
             'full' => $request->full,
             'short' => $request->short,
-            'iframe' => $request->iframe,
+            'iframe' => $request->iframeHint,
             'reason_id' => $request->reason_id,
         ]);
     }

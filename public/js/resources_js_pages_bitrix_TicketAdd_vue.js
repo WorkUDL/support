@@ -73,15 +73,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     hints: function hints() {
       var _this = this;
+      console.log(this.hintList);
       this.openedHint = this.hintList.filter(function (h) {
         return h.reason_id === _this.reasonsActive.id;
       }).length === 1 ? [0] : [];
       return this.hintList.filter(function (h) {
         return h.reason_id === _this.reasonsActive.id;
       });
-    },
-    iframe: function iframe(item) {
-      console.log(item);
     }
   }),
   watch: {
@@ -314,7 +312,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         axios.post('/api/hint/add', {
           "short": this.shortHint,
           full: this.fullHint,
-          iframe: this.iframeHint,
+          iframeHint: this.iframeHint,
           reason_id: this.reasonsActive.id
         }, {
           headers: {
@@ -350,7 +348,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     this.getHint();
     this.getGroups();
     this.getInformation();
-    this.iframe();
   }
 });
 
@@ -809,11 +806,11 @@ var render = function render() {
     on: {
       click: _vm.addTemplate
     }
-  }, [_vm._v("Создать")])], 1), _vm._v(" "), _c("v-card-title", [_vm._v("Шаблонные ответы в данной теме:")]), _vm._v(" "), _vm._l(_vm.templateResponses.slice(0, 5), function (template) {
+  }, [_vm._v("Создать")])], 1), _vm._v(" "), _c("v-card-title", [_vm._v("Шаблонные ответы в данной теме:")]), _vm._v(" "), _vm._l(_vm.templateResponses, function (template) {
     return _c("v-card", {
       key: template,
       staticClass: "pa-2 justify-content-between d-flex"
-    }, [_vm._v("\n                " + _vm._s(template.length > 15 ? template.slice(0, 15) + "..." : template) + "\n                "), _c("v-icon", {
+    }, [_vm._v("\n                " + _vm._s(template.length > 25 ? template.slice(0, 25) + "..." : template) + "\n                "), _c("v-icon", {
       staticClass: "ml-2",
       attrs: {
         color: "red"
@@ -914,7 +911,11 @@ var render = function render() {
       },
       expression: "fullHint"
     }
-  })], 1)], 1), _vm._v(" "), _c("v-card-actions", [_c("v-spacer"), _vm._v(" "), _c("v-btn", {
+  })], 1), _vm._v(" "), _c("v-col", {
+    attrs: {
+      cols: "12"
+    }
+  }, [_c("v-card-title", [_vm._v(" Прикрепите изображения ")]), _vm._v(" "), _c("v-file-input")], 1)], 1), _vm._v(" "), _c("v-card-actions", [_c("v-spacer"), _vm._v(" "), _c("v-btn", {
     attrs: {
       text: ""
     },
