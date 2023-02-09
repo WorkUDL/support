@@ -23,4 +23,5 @@ class HintController extends Controller
             'reason_id' => $request->reason_id,
         ]);
     }
+
 }

@@ -64,6 +64,15 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       ticket_message: null,
       hintList: [],
       addingTicket: false,
+      image: null,
+      imagesForAdd: [],
+      imagesForDisplay: [],
+      isImageUploading: false,
+      dialogImageForSolutions: false,
+      dialogImageForAdd: false,
+      dialogFullImage: false,
+      currentImg: null,
+      hintActive: null,
       editId: null
     };
   },
@@ -293,7 +302,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         });
       }
     },
-    getHint: function getHint() {
+    getHint: function getHint(item) {
       var _this11 = this;
       axios.post('/api/hint/get', {}, {
         headers: {
@@ -341,6 +350,76 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       })["catch"](function (err) {
         return console.error(err);
       });
+    },
+    addImage: function addImage(event) {
+      if (event.size > 2e+6) {
+        alert('Вы можете добавлять изображения весом до 2мб');
+      }
+      if (event.type.includes('image') !== true) {
+        alert('Вы можете добавлять только изображения');
+      } else {
+        this.isFileUploading = true;
+        this.imagesForAdd.push(event);
+        console.log(this.imagesForAdd);
+        this.isFileUploading = false;
+      }
+    },
+    createImage: function createImage() {
+      var _this14 = this;
+      var data = new FormData();
+      this.imagesForAdd.forEach(function (image) {
+        data.append("images[]", image);
+        data.append('hint_id', _this14.hintActive);
+      });
+      axios.post('/api/hint/add_image', data, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        console.log(res);
+        _this14.dialogImageForAdd = false;
+        _this14.imagesForAdd = [];
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    getImage: function getImage() {
+      var _this15 = this;
+      this.dialogImageForSolutions = true;
+      axios.post('/api/hint/get_image', {
+        hint_id: this.hintActive
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        _this15.imagesForDisplay = res.data.map(function (el) {
+          return el.image_path;
+        });
+        console.log(_this15.imagesForDisplay);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    deleteImage: function deleteImage(image, id) {
+      this.imagesForDisplay.splice(id, 1);
+      axios.post('/api/hint/delete_image', {
+        image_path: image
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        return console.log(res);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    showFormAddImage: function showFormAddImage() {
+      this.dialogImageForAdd = true;
+    },
+    getHintId: function getHintId(id) {
+      this.hintActive = id;
     }
   },
   mounted: function mounted() {
@@ -485,9 +564,6 @@ var render = function render() {
     }
   }, [!_vm.skippedHint && _vm.hints.length ? _c("v-expansion-panels", {
     staticClass: "mb-4",
-    attrs: {
-      multiple: ""
-    },
     model: {
       value: _vm.openedHint,
       callback: function callback($$v) {
@@ -497,10 +573,18 @@ var render = function render() {
     }
   }, _vm._l(_vm.hints, function (item) {
     return _c("v-expansion-panel", {
-      key: item.id
+      key: item.id,
+      attrs: {
+        "single-expand": ""
+      }
     }, [_c("v-expansion-panel-header", {
       domProps: {
         innerHTML: _vm._s(item["short"])
+      },
+      on: {
+        click: function click($event) {
+          return _vm.getHintId(item.id);
+        }
       }
     }), _vm._v(" "), _c("v-expansion-panel-content", [_c("v-row", {
       staticStyle: {
@@ -533,7 +617,33 @@ var render = function render() {
         allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
         allowfullscreen: ""
       }
-    })]) : _vm._e()], 1)], 1)], 1);
+    })]) : _vm._e(), _vm._v(" "), _c("v-col", {
+      attrs: {
+        cols: "6"
+      }
+    }, [_vm.isManager || _vm.isAdmin ? _c("v-btn", {
+      attrs: {
+        text: "",
+        color: "primary",
+        small: ""
+      },
+      on: {
+        click: _vm.showFormAddImage
+      }
+    }, [_vm._v("\n                                    Добавить изображение\n                                    ")]) : _vm._e()], 1), _vm._v(" "), _c("v-col", {
+      attrs: {
+        cols: "6"
+      }
+    }, [_c("v-btn", {
+      attrs: {
+        text: "",
+        color: "primary",
+        small: ""
+      },
+      on: {
+        click: _vm.getImage
+      }
+    }, [_vm._v("\n                                        Просмотреть изображения\n                                    ")])], 1)], 1)], 1)], 1);
   }), 1) : _vm._e(), _vm._v(" "), !_vm.skippedHint && _vm.hints.length ? _c("v-btn", {
     staticClass: "float-right",
     attrs: {
@@ -825,6 +935,163 @@ var render = function render() {
     staticClass: "pa-2"
   }, [_vm._v("В данной теме шаблонные ответы отсутствуют")]) : _vm._e()], 2)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
+      "max-width": "600"
+    },
+    model: {
+      value: _vm.dialogImageForSolutions,
+      callback: function callback($$v) {
+        _vm.dialogImageForSolutions = $$v;
+      },
+      expression: "dialogImageForSolutions"
+    }
+  }, [_c("v-card", [_c("v-card-title", [_vm._v(" Пошаговая инструкция: ")]), _vm._v(" "), _vm._l(_vm.imagesForDisplay, function (image, id) {
+    return _c("v-col", {
+      key: id,
+      staticClass: "d-flex align-items-center",
+      attrs: {
+        cols: "12"
+      }
+    }, [_c("img", {
+      staticClass: "pa-2",
+      staticStyle: {
+        width: "304px",
+        "margin-left": "20%",
+        height: "210px",
+        cursor: "pointer"
+      },
+      attrs: {
+        src: image
+      },
+      on: {
+        click: function click($event) {
+          _vm.dialogFullImage = true;
+          _vm.currentImg = image;
+        }
+      }
+    }), _vm._v(" "), _vm.isManager || _vm.isAdmin ? _c("v-icon", {
+      attrs: {
+        color: "red"
+      },
+      on: {
+        click: function click($event) {
+          return _vm.deleteImage(image, id);
+        }
+      }
+    }, [_vm._v("\n                        mdi-close\n                    ")]) : _vm._e()], 1);
+  }), _vm._v(" "), _c("v-card-actions", [_c("v-btn", {
+    attrs: {
+      text: ""
+    },
+    on: {
+      click: function click($event) {
+        _vm.dialogImageForSolutions = false;
+      }
+    }
+  }, [_vm._v("Закрыть")])], 1)], 2)], 1), _vm._v(" "), _c("v-dialog", {
+    attrs: {
+      "max-width": "1000"
+    },
+    model: {
+      value: _vm.dialogFullImage,
+      callback: function callback($$v) {
+        _vm.dialogFullImage = $$v;
+      },
+      expression: "dialogFullImage"
+    }
+  }, [_c("v-card", [_c("v-img", {
+    attrs: {
+      href: "#",
+      src: _vm.currentImg
+    }
+  }), _vm._v(" "), _c("v-card-actions", [_c("v-btn", {
+    attrs: {
+      color: "primary",
+      text: ""
+    },
+    on: {
+      click: function click($event) {
+        _vm.dialogFullImage = false;
+      }
+    }
+  }, [_vm._v("Закрыть")])], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
+    attrs: {
+      "max-width": "600"
+    },
+    model: {
+      value: _vm.dialogImageForAdd,
+      callback: function callback($$v) {
+        _vm.dialogImageForAdd = $$v;
+      },
+      expression: "dialogImageForAdd"
+    }
+  }, [_c("v-card", [_c("v-card-title", [_vm._v(" Прикрепите изображения ")]), _vm._v(" "), !_vm.isImageUploading ? _c("v-file-input", {
+    ref: "fileInput",
+    staticClass: "mb-9 pa-2",
+    on: {
+      change: _vm.addImage,
+      paste: function paste($event) {
+        $event.preventDefault();
+        return _vm.addImage.apply(null, arguments);
+      }
+    },
+    model: {
+      value: _vm.image,
+      callback: function callback($$v) {
+        _vm.image = $$v;
+      },
+      expression: "image"
+    }
+  }) : _vm._e(), _vm._v(" "), _vm.isImageUploading ? _c("div", {
+    staticClass: "mb-9"
+  }, [_c("v-progress-circular", {
+    attrs: {
+      indeterminate: "",
+      color: "primary"
+    }
+  }), _vm._v(" "), _c("p", [_vm._v("Загрузка изображения...")])], 1) : _vm._e(), _vm._v(" "), _c("v-col", {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: _vm.imagesForAdd.length > 0,
+      expression: "imagesForAdd.length > 0"
+    }],
+    attrs: {
+      cols: "12"
+    }
+  }, [_c("v-card-title", [_vm._v("Прикрепленные изображения:")]), _vm._v(" "), _vm._l(_vm.imagesForAdd, function (image, index) {
+    return _c("v-card", {
+      key: index,
+      staticClass: "pa-1 ma-1 d-inline-block"
+    }, [_vm._v("\n                        " + _vm._s(image.name) + "\n                        "), _c("v-icon", {
+      attrs: {
+        small: "",
+        color: "red"
+      },
+      on: {
+        click: function click($event) {
+          return _vm.imagesForAdd.splice(index, 1);
+        }
+      }
+    }, [_vm._v("\n                            mdi-close\n                        ")])], 1);
+  })], 2), _vm._v(" "), _c("v-card-actions", [_c("v-btn", {
+    attrs: {
+      text: ""
+    },
+    on: {
+      click: function click($event) {
+        _vm.dialogImageForAdd = false;
+      }
+    }
+  }, [_vm._v("Отмена")]), _vm._v(" "), _c("v-btn", {
+    attrs: {
+      text: "",
+      color: "primary"
+    },
+    on: {
+      click: _vm.createImage
+    }
+  }, [_vm._v("Добавить")])], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
+    attrs: {
       persistent: ""
     },
     model: {
@@ -911,11 +1178,7 @@ var render = function render() {
       },
       expression: "fullHint"
     }
-  })], 1), _vm._v(" "), _c("v-col", {
-    attrs: {
-      cols: "12"
-    }
-  }, [_c("v-card-title", [_vm._v(" Прикрепите изображения ")]), _vm._v(" "), _c("v-file-input")], 1)], 1), _vm._v(" "), _c("v-card-actions", [_c("v-spacer"), _vm._v(" "), _c("v-btn", {
+  })], 1)], 1), _vm._v(" "), _c("v-card-actions", [_c("v-spacer"), _vm._v(" "), _c("v-btn", {
     attrs: {
       text: ""
     },
@@ -930,6 +1193,13 @@ var render = function render() {
       type: "submit",
       disabled: !_vm.validFormAddHint || _vm.addingHint,
       loading: _vm.addingHint
+    },
+    model: {
+      value: _vm.imagesForAdd,
+      callback: function callback($$v) {
+        _vm.imagesForAdd = $$v;
+      },
+      expression: "imagesForAdd"
     }
   }, [_vm._v("\n                        Добавить\n                    ")])], 1)], 1)], 1)], 1)], 1);
 };

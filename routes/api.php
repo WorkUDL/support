@@ -58,6 +58,9 @@ Route::group([
 ], function ($router) {
     Route::post('/get', [\App\Http\Controllers\HintController::class, 'get']);
     Route::post('/add', [\App\Http\Controllers\HintController::class, 'add']);
+    Route::post('/add_image', [\App\Http\Controllers\ImageHintController::class, 'add_image']);
+    Route::post('/get_image', [\App\Http\Controllers\ImageHintController::class, 'get_image']);
+    Route::post('/delete_image', [\App\Http\Controllers\ImageHintController::class, 'delete_image']);
 });
 
 Route::group([

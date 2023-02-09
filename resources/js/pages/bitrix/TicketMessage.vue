@@ -620,6 +620,9 @@ export default {
             return templateResponses.filter(response => response.includes(message));
         },
         addFile(event) {
+            if(event.size > 2e+6) {
+                alert('Вы можете добавлять изображения весом до 2мб')
+            }
             if (event.type.includes('image') !== true){
                 alert('Вы можете добавлять только изображения')
             } else {

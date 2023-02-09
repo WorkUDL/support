@@ -69,12 +69,11 @@
                 <v-col y-axis="end">
                     <v-expansion-panels
                         v-if="!skippedHint && hints.length"
-                        multiple
                         v-model="openedHint"
                         class="mb-4"
                     >
-                        <v-expansion-panel v-for="item in hints" :key="item.id">
-                            <v-expansion-panel-header v-html="item.short"/>
+                        <v-expansion-panel v-for="item in hints" :key="item.id" single-expand>
+                            <v-expansion-panel-header @click="getHintId(item.id)" v-html="item.short"/>
                             <v-expansion-panel-content>
                                 <v-row style="white-space: pre;">
                                     <v-col cols="12" v-if="item.full">
@@ -89,6 +88,27 @@
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowfullscreen
                                         />
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <v-btn
+                                        text
+                                        color="primary"
+                                        small
+                                        @click="showFormAddImage"
+                                        v-if="isManager || isAdmin"
+                                        >
+                                        Добавить изображение
+                                        </v-btn>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <v-btn
+                                        text
+                                        color="primary"
+                                        small
+                                        @click="getImage"
+                                        >
+                                            Просмотреть изображения
+                                        </v-btn>
                                     </v-col>
                                 </v-row>
                             </v-expansion-panel-content>
@@ -306,6 +326,94 @@
             </v-card>
         </v-dialog>
         <v-dialog
+        v-model="dialogImageForSolutions"
+        max-width="600"
+        >
+            <v-card>
+                <v-card-title> Пошаговая инструкция: </v-card-title>
+                    <v-col cols="12" v-for="(image, id) in imagesForDisplay" :key="id" class="d-flex align-items-center">
+                        <img :src="image" class="pa-2"
+                             style="width: 304px;
+                             margin-left: 20%;
+                             height: 210px;
+                             cursor: pointer;"
+                             @click="dialogFullImage = true; currentImg = image"
+                        >
+                        <v-icon
+                        v-if="isManager || isAdmin"
+                        color="red"
+                        @click="deleteImage(image, id)"
+                        >
+                            mdi-close
+                        </v-icon>
+                    </v-col>
+                <v-card-actions>
+                    <v-btn
+                    text
+                    @click="dialogImageForSolutions = false"
+                    >Закрыть</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <v-dialog
+        v-model="dialogFullImage"
+        max-width="1000"
+        >
+          <v-card>
+              <v-img href="#" :src="currentImg"></v-img>
+              <v-card-actions>
+                  <v-btn color="primary" text @click="dialogFullImage = false">Закрыть</v-btn>
+              </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-dialog
+            v-model="dialogImageForAdd"
+            max-width="600"
+        >
+            <v-card>
+                <v-card-title> Прикрепите изображения </v-card-title>
+                        <v-file-input
+                            @change="addImage"
+                            @paste.prevent="addImage"
+                            v-model="image"
+                            ref="fileInput"
+                            class="mb-9 pa-2"
+                            v-if="!isImageUploading"
+                        >
+
+                        </v-file-input>
+                        <div v-if="isImageUploading"
+                             class="mb-9"
+                        >
+                            <v-progress-circular
+                                indeterminate
+                                color="primary"
+                            ></v-progress-circular>
+                            <p>Загрузка изображения...</p>
+                        </div>
+                    <v-col cols="12" v-show="imagesForAdd.length > 0">
+                        <v-card-title>Прикрепленные изображения:</v-card-title>
+                        <v-card v-for="(image, index) in imagesForAdd" :key="index" class="pa-1 ma-1 d-inline-block">
+                            {{ image.name }}
+                            <v-icon small color="red" @click="imagesForAdd.splice(index, 1)">
+                                mdi-close
+                            </v-icon>
+                        </v-card>
+                    </v-col>
+                <v-card-actions>
+                        <v-btn
+                            text
+                            @click="dialogImageForAdd = false"
+                        >Отмена</v-btn>
+                        <v-btn
+                            @click="createImage"
+                            text
+                            color="primary"
+                        >Добавить</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <v-dialog
             v-model="openFormAddHint"
             persistent
         >
@@ -346,12 +454,6 @@
                                 label="Подробное описание действий"
                             />
                         </v-col>
-                        <v-col cols="12">
-                            <v-card-title> Прикрепите изображения </v-card-title>
-                            <v-file-input>
-
-                            </v-file-input>
-                        </v-col>
                     </v-row>
                     <v-card-actions>
                         <v-spacer></v-spacer>
@@ -362,6 +464,7 @@
                             Отмена
                         </v-btn>
                         <v-btn
+                            v-model="imagesForAdd"
                             color="success"
                             type="submit"
                             :disabled="!validFormAddHint || addingHint"
@@ -425,6 +528,16 @@ export default {
             ticket_message: null,
             hintList: [],
             addingTicket: false,
+
+            image: null,
+            imagesForAdd: [],
+            imagesForDisplay: [],
+            isImageUploading: false,
+            dialogImageForSolutions: false,
+            dialogImageForAdd: false,
+            dialogFullImage: false,
+            currentImg: null,
+            hintActive: null,
 
             editId: null
         }
@@ -647,7 +760,7 @@ export default {
                     .finally(() => this.addingTicket = false)
             }
         },
-        getHint() {
+        getHint(item) {
             axios.post('/api/hint/get', {}, {
                 headers: {
                     Authorization: 'Bearer '+this.currentToken
@@ -693,6 +806,73 @@ export default {
                 .then(resp => this.groups = resp.data)
                 .catch(err => console.error(err))
         },
+        addImage(event) {
+            if(event.size > 2e+6) {
+                alert('Вы можете добавлять изображения весом до 2мб')
+            }
+            if (event.type.includes('image') !== true){
+                alert('Вы можете добавлять только изображения')
+            } else {
+                this.isFileUploading = true
+                this.imagesForAdd.push(event)
+                console.log(this.imagesForAdd)
+                this.isFileUploading = false
+            }
+        },
+        createImage() {
+            let data = new FormData();
+            this.imagesForAdd.forEach((image) => {
+                data.append(`images[]`, image)
+                data.append('hint_id', this.hintActive)
+            })
+            axios
+                .post('/api/hint/add_image', data, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res=> {
+                console.log(res)
+                this.dialogImageForAdd = false
+                this.imagesForAdd = []
+                })
+                .catch(err=> console.log(err))
+        },
+        getImage() {
+            this.dialogImageForSolutions = true
+            axios
+                .post('/api/hint/get_image', {
+                    hint_id: this.hintActive
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => {
+                this.imagesForDisplay = res.data.map((el) => {
+                      return  el.image_path
+                    })
+                console.log(this.imagesForDisplay)
+                })
+                .catch(err => console.log(err))
+        },
+        deleteImage(image, id) {
+            this.imagesForDisplay.splice(id, 1)
+            axios
+                .post('/api/hint/delete_image', {
+                    image_path: image
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res=> console.log(res))
+                .catch(err=> console.log(err))
+        },
+        showFormAddImage() {
+            this.dialogImageForAdd = true
+        },
+        getHintId(id) {
+            this.hintActive = id
+        },
+
     },
     mounted() {
         this.getReason()

@@ -236,6 +236,9 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     addFile: function addFile(event) {
       var _this7 = this;
+      if (event.size > 2e+6) {
+        alert('Вы можете добавлять изображения весом до 2мб');
+      }
       if (event.type.includes('image') !== true) {
         alert('Вы можете добавлять только изображения');
       } else {
