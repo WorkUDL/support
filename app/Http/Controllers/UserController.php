@@ -19,66 +19,59 @@ class UserController extends Controller
 
         if ($request->status == 1) {
 
-        $groups = GroupUser::where('user_id', $request->manager_id)->get();
-        $groups_id = $groups->map(function ($group){
-            return $group->group_id;
-        });
+            $groups = GroupUser::where('user_id', $request->manager_id)->get();
+            $groups_id = $groups->map(function ($group){
+                return $group->group_id;
+            });
 
+            if ($groups->count() == 0) {
+                return 'Коллекция $groups пуста';
+            }
 
-        $managers_id = $groups->map(function ($group){
-            return GroupUser::where('group_id', $group->group_id)->pluck('user_id')->filter(function($user_id) {
-                    return $user_id != Auth::id();
-                });
-        });
+            //id других менеджеров из своих групп
+            $managers_id = $groups->map(function ($group){
+                return GroupUser::where('group_id', $group->group_id)->pluck('user_id')->filter(function($user_id) {
+                        return $user_id != Auth::id();
+                    });
+            });
 
-        $is_online_my_groups = collect($managers_id)->flatten()->map(function ($id){
-            $user = User::find($id);
-            return $user->online;
-        });
+            if ($managers_id->count() == 0) {
+                return 'Коллекция $managers_id пуста';
+            }
 
-
-        $id_online_managers_my_groups = collect($managers_id)->flatten()->map(function ($id){
-            $user = User::find($id);
-            return $user->id;
-        });
-
-            $percent_tickets = 100 / ($is_online_my_groups->count() + 1);
-
-            $not_read_message = Ticket::where('active', 1)  // все нужные активные тикеты
-            ->join('reasons', function ($join) use ($groups_id) {
-                $join->on('tickets.reason_id', '=', 'reasons.id')
-                    ->whereIn('reasons.group_id', $groups_id);
-            })
-                ->join('messages', function ($join) use ($id_online_managers_my_groups) {
-                    $join->on('tickets.id', '=', 'messages.ticket_id')
-                        ->whereNotIn('messages.user_id', $id_online_managers_my_groups);
-                })
-                ->pluck('ticket_id');
-
-            $sum_active_tickets = Ticket::whereIn('tickets.id', $not_read_message) // вес всех нужных активных тикетов
-            ->join('reasons', 'tickets.reason_id', 'reasons.id')
-                ->sum('reasons.weight');
-
-            $take_this_weight_tickets = $sum_active_tickets * ($percent_tickets / 100); // сумма веса, который нужно забрать
-
-            $selected_tickets = collect();
-            $selected_weight = 0;
-
-            foreach ($not_read_message as $ticket_id){
-                $tiket_weight = Ticket::where('tickets.id', $ticket_id)
-                    ->join('reasons', 'tickets.reason_id', 'reasons.id')
-                    ->value('weight');
-                if($selected_weight + $tiket_weight <= $take_this_weight_tickets){
-                    $selected_tickets->push($ticket_id);
-                    $selected_weight += $tiket_weight;
-                } else {
-                    break;
+            //id других менеджеров из своих групп, которые сейчас онлайн
+            $id_online_managers_my_groups = collect($managers_id)->flatten()->map(function ($id){
+                $user = User::find($id);
+                if($user->online == 1) {
+                    return $user->id;
                 }
+            })->filter();
+
+            // все нужные активные тикеты (уже отсортированы)
+            $not_read_message = Ticket::where('active', 1)
+                ->leftJoin('reasons', 'tickets.reason_id', '=', 'reasons.id')
+                ->leftJoin('messages', 'tickets.id', '=', 'messages.ticket_id')
+                ->whereIn('reasons.group_id', $groups_id)
+                ->whereNotIn('messages.user_id', $id_online_managers_my_groups)
+                ->orderBy('reasons.weight', 'desc')
+                ->pluck('tickets.id');
+
+            if ($not_read_message->count() == 0) {
+                return 'Коллекция $not_read_message пуста';
+            }
+
+            $selected_tickets = [];
+            for ($i = 0; $i < $not_read_message->count(); $i += $id_online_managers_my_groups->count() + 1) {
+                $selected_tickets[] = $not_read_message[$i];
+            }
+
+            if ($selected_tickets->count() == 0) {
+                return 'Коллекция $selected_tickets пуста';
             }
 
             foreach ($selected_tickets as $ticket_id) {
                 Ticket::where('id', $ticket_id)->update([
-                    'manager_id' => Auth::user()->id
+                    'manager_id' => $request->manager_id
                 ]);
             }
             return 'success';
