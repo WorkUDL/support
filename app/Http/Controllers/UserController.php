@@ -56,24 +56,18 @@ class UserController extends Controller
                 ->orderBy('reasons.weight', 'desc')
                 ->pluck('tickets.id');
 
+            dump($not_read_message);
+
             if ($not_read_message->count() == 0) {
                 return 'Коллекция $not_read_message пуста';
             }
 
-            $selected_tickets = [];
             for ($i = 0; $i < $not_read_message->count(); $i += $id_online_managers_my_groups->count() + 1) {
-                $selected_tickets[] = $not_read_message[$i];
-            }
-
-            if ($selected_tickets->count() == 0) {
-                return 'Коллекция $selected_tickets пуста';
-            }
-
-            foreach ($selected_tickets as $ticket_id) {
-                Ticket::where('id', $ticket_id)->update([
+                Ticket::where('id', $not_read_message[$i])->update([
                     'manager_id' => $request->manager_id
                 ]);
             }
+
             return 'success';
         }
     }
