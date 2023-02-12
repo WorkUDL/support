@@ -432,25 +432,8 @@ export default {
                 })
                 .catch(err => console.log(err))
         },
-
-        takeTickets() {
-            axios
-                .post('/api/user/take_tickets', {
-                    manager_id: this.currentUser.id
-                },  {
-                    headers: {
-                        Authorization: 'Bearer '+this.currentToken
-                    }
-                    }
-                ).then(resp => {
-                    console.log(resp);
-                }
-                )
-                .catch(err => console.log(err))
-        },
     },
     mounted() {
-        this.takeTickets()
         this.getTickets()
     }
 }

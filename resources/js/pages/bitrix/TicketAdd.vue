@@ -146,6 +146,30 @@
                                 lazy-validation
                                 @submit.prevent="addTicket"
                             >
+                                <v-select
+                                    v-model="selectedData"
+                                    :items="callData"
+                                    :item-text="item => item.department"
+                                    :item-value="item => item"
+                                    label="Выберите город"
+                                    :active="active"
+                                    v-if="active == 103"
+                                    search-input
+                                >
+                                    <!--Этот элемент привязан к id проблемы(reason) нужно заменить на актуальный id,  "==" на "===" не менять!-->
+                                </v-select>
+                                <v-select
+                                    v-model="selectedData"
+                                    :items="bitrixData"
+                                    :item-text="item => item.department"
+                                    :item-value="item => item"
+                                    label="Выберите город"
+                                    :active="active"
+                                    v-if="active == 102"
+                                    search-input
+                                >
+                                    <!--Этот элемент привязан к id проблемы(reason) нужно заменить на актуальный id,  "==" на "===" не менять!-->
+                                </v-select>
                                 <v-textarea
                                     v-model="ticket_message"
                                     :rules="requiredRules"
@@ -481,6 +505,7 @@
 
 <script>
 import {mapState} from "vuex";
+import Bitrix24 from "bitrix24-vue";
 
 export default {
     name: "TicketAdd",
@@ -506,6 +531,7 @@ export default {
             weight: null,
             group_id: null,
             groups: [],
+            reasonId: null,
             reasonAddLoading: false,
             reasonsActive: null,
             reasonsList: [],
@@ -539,6 +565,10 @@ export default {
             currentImg: null,
             hintActive: null,
 
+            selectedData: null,
+            callData: [],
+            bitrixData: [],
+
             editId: null
         }
     },
@@ -557,6 +587,12 @@ export default {
     },
     watch: {
         active(newVal){
+            if(newVal == 102) {
+                this.getListBitrixData()
+            }
+            if(newVal == 103) {
+                this.getListCallData()
+            }
             if(newVal.length >= 1 && !this.reasonsList.find(user => user.id === newVal[0]).children){
                 if(this.$refs.formTicket)   this.$refs.formTicket.reset()
 
@@ -576,6 +612,7 @@ export default {
                         }
                     }).then(resp => {
                         this.ticket_information = resp.data.join('\n')
+                        console.log(this.ticket_information);
                         this.ticket_information_show = true
                     }).catch(err => {
                         console.error(err)
@@ -642,6 +679,7 @@ export default {
                 .catch(err => console.log(err))
         },
         showFormAddTemplate(item) {
+            console.log(item)
             this.editId = item.id
             this.dialogCreateTemplate = true
             this.getTemplates()
@@ -740,6 +778,7 @@ export default {
 
                 axios
                     .post('/api/ticket/add', {
+                        data: this.selectedData,
                         message: this.ticket_information !== null
                             ? this.ticket_information+"\n\n"+this.ticket_message
                             : this.ticket_message,
@@ -872,6 +911,53 @@ export default {
         getHintId(id) {
             this.hintActive = id
         },
+        getListCallData() {
+                axios
+                    .post('/api/city/get_call_managers', {},{
+                        headers: {
+                            Authorization: 'Bearer '+this.currentToken
+                        }
+                    }).then(res=> {
+                    console.log(res.data);
+                    res.data.forEach((element) => {
+                        BX24.callBatch({
+                            get_department: {
+                                method: 'department.get',
+                                params: {
+                                    ID: element.structure_id
+                                }
+                            }
+                        }, (result) => {
+                            let department = result.get_department.answer.result[0].NAME
+                            this.callData.push({department: department, manager: element.trainer_id})
+                        })
+                    })
+                })
+                .catch(err=> console.log(err))
+        },
+        getListBitrixData() {
+            axios
+                .post('/api/city/get_bitrix_managers', {},{
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res=> {
+                res.data.forEach((element) => {
+                    BX24.callBatch({
+                        get_department: {
+                            method: 'department.get',
+                            params: {
+                                ID: element.structure_id
+                            }
+                        }
+                    }, (result) => {
+                        let department = result.get_department.answer.result[0].NAME
+                        this.bitrixData.push({department: department, manager: element.manager_id})
+                    })
+                })
+            })
+            .catch(err=> console.log(err))
+        }
 
     },
     mounted() {

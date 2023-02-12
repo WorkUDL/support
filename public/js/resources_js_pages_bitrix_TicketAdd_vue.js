@@ -11,13 +11,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var bitrix24_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bitrix24-vue */ "./node_modules/bitrix24-vue/dist/bitrix24-vue.common.js");
+/* harmony import */ var bitrix24_vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(bitrix24_vue__WEBPACK_IMPORTED_MODULE_0__);
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "TicketAdd",
@@ -42,6 +45,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       weight: null,
       group_id: null,
       groups: [],
+      reasonId: null,
       reasonAddLoading: false,
       reasonsActive: null,
       reasonsList: [],
@@ -73,10 +77,13 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       dialogFullImage: false,
       currentImg: null,
       hintActive: null,
+      selectedData: null,
+      callData: [],
+      bitrixData: [],
       editId: null
     };
   },
-  computed: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['currentToken', 'currentUser', 'isManager', 'isAdmin'])), {}, {
+  computed: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapState)(['currentToken', 'currentUser', 'isManager', 'isAdmin'])), {}, {
     items: function items() {
       return this.isManager && this.isAdmin ? this.buildTree(this.reasonsList) : this.buildTree(this.reasonsList, 0);
     },
@@ -94,6 +101,12 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   watch: {
     active: function active(newVal) {
       var _this2 = this;
+      if (newVal == 102) {
+        this.getListBitrixData();
+      }
+      if (newVal == 103) {
+        this.getListCallData();
+      }
       if (newVal.length >= 1 && !this.reasonsList.find(function (user) {
         return user.id === newVal[0];
       }).children) {
@@ -116,6 +129,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
             }
           }).then(function (resp) {
             _this2.ticket_information = resp.data.join('\n');
+            console.log(_this2.ticket_information);
             _this2.ticket_information_show = true;
           })["catch"](function (err) {
             console.error(err);
@@ -184,6 +198,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       });
     },
     showFormAddTemplate: function showFormAddTemplate(item) {
+      console.log(item);
       this.editId = item.id;
       this.dialogCreateTemplate = true;
       this.getTemplates();
@@ -284,6 +299,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       if (this.$refs.formTicket.validate()) {
         this.addingTicket = true;
         axios.post('/api/ticket/add', {
+          data: this.selectedData,
           message: this.ticket_information !== null ? this.ticket_information + "\n\n" + this.ticket_message : this.ticket_message,
           reason_id: this.reasonsActive.id
         }, {
@@ -420,6 +436,61 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     getHintId: function getHintId(id) {
       this.hintActive = id;
+    },
+    getListCallData: function getListCallData() {
+      var _this16 = this;
+      axios.post('/api/city/get_call_managers', {}, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        console.log(res.data);
+        res.data.forEach(function (element) {
+          BX24.callBatch({
+            get_department: {
+              method: 'department.get',
+              params: {
+                ID: element.structure_id
+              }
+            }
+          }, function (result) {
+            var department = result.get_department.answer.result[0].NAME;
+            _this16.callData.push({
+              department: department,
+              manager: element.trainer_id
+            });
+          });
+        });
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    getListBitrixData: function getListBitrixData() {
+      var _this17 = this;
+      axios.post('/api/city/get_bitrix_managers', {}, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        res.data.forEach(function (element) {
+          BX24.callBatch({
+            get_department: {
+              method: 'department.get',
+              params: {
+                ID: element.structure_id
+              }
+            }
+          }, function (result) {
+            var department = result.get_department.answer.result[0].NAME;
+            _this17.bitrixData.push({
+              department: department,
+              manager: element.manager_id
+            });
+          });
+        });
+      })["catch"](function (err) {
+        return console.log(err);
+      });
     }
   },
   mounted: function mounted() {
@@ -692,7 +763,47 @@ var render = function render() {
       },
       expression: "validTicket"
     }
-  }, [_c("v-textarea", {
+  }, [_vm.active == 103 ? _c("v-select", {
+    attrs: {
+      items: _vm.callData,
+      "item-text": function itemText(item) {
+        return item.department;
+      },
+      "item-value": function itemValue(item) {
+        return item;
+      },
+      label: "Выберите город",
+      active: _vm.active,
+      "search-input": ""
+    },
+    model: {
+      value: _vm.selectedData,
+      callback: function callback($$v) {
+        _vm.selectedData = $$v;
+      },
+      expression: "selectedData"
+    }
+  }) : _vm._e(), _vm._v(" "), _vm.active == 102 ? _c("v-select", {
+    attrs: {
+      items: _vm.bitrixData,
+      "item-text": function itemText(item) {
+        return item.department;
+      },
+      "item-value": function itemValue(item) {
+        return item;
+      },
+      label: "Выберите город",
+      active: _vm.active,
+      "search-input": ""
+    },
+    model: {
+      value: _vm.selectedData,
+      callback: function callback($$v) {
+        _vm.selectedData = $$v;
+      },
+      expression: "selectedData"
+    }
+  }) : _vm._e(), _vm._v(" "), _c("v-textarea", {
     attrs: {
       rules: _vm.requiredRules,
       "auto-grow": "",

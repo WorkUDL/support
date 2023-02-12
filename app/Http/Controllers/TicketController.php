@@ -108,7 +108,6 @@ class TicketController extends Controller
 
     public function add(Request $request)
     {
-        dump($request);
 
         $reason = Reason::query()->find($request->reason_id);
 
@@ -130,6 +129,11 @@ class TicketController extends Controller
             return response([
                 'error' => 'Для данной проблемы нет ответственных'
             ], 400);
+        }
+
+        if($request->data) {
+            $manager = User::where('bitrix_id', $request->data['manager'])->first();
+            return $this->create($manager, $request);
         }
 
         if(Ticket::query()->whereIn('manager_id', $group->users->pluck('id'))->where('active', 1)->count() == 0) {

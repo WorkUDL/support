@@ -20,13 +20,14 @@ class UserController extends Controller
         if ($request->status == 1) {
 
             $groups = GroupUser::where('user_id', $request->manager_id)->get();
-            $groups_id = $groups->map(function ($group){
-                return $group->group_id;
-            });
 
             if ($groups->count() == 0) {
                 return 'Коллекция $groups пуста';
             }
+
+            $groups_id = $groups->map(function ($group){
+                return $group->group_id;
+            });
 
             //id других менеджеров из своих групп
             $managers_id = $groups->map(function ($group){
@@ -55,8 +56,6 @@ class UserController extends Controller
                 ->whereNotIn('messages.user_id', $id_online_managers_my_groups)
                 ->orderBy('reasons.weight', 'desc')
                 ->pluck('tickets.id');
-
-            dump($not_read_message);
 
             if ($not_read_message->count() == 0) {
                 return 'Коллекция $not_read_message пуста';

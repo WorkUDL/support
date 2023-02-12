@@ -700,23 +700,9 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       })["catch"](function (err) {
         return console.log(err);
       });
-    },
-    takeTickets: function takeTickets() {
-      axios.post('/api/user/take_tickets', {
-        manager_id: this.currentUser.id
-      }, {
-        headers: {
-          Authorization: 'Bearer ' + this.currentToken
-        }
-      }).then(function (resp) {
-        console.log(resp);
-      })["catch"](function (err) {
-        return console.log(err);
-      });
     }
   },
   mounted: function mounted() {
-    this.takeTickets();
     this.getTickets();
   }
 });
