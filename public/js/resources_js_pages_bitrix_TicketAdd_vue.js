@@ -40,6 +40,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       visibility: null,
       search: null,
       active: [],
+      parentId: null,
       avatar: null,
       open: [],
       weight: null,
@@ -68,6 +69,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       ticket_message: null,
       hintList: [],
       addingTicket: false,
+      anyDeskNumber: null,
       image: null,
       imagesForAdd: [],
       imagesForDisplay: [],
@@ -300,7 +302,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         this.addingTicket = true;
         axios.post('/api/ticket/add', {
           data: this.selectedData,
-          message: this.ticket_information !== null ? this.ticket_information + "\n\n" + this.ticket_message : this.ticket_message,
+          message: this.ticket_information !== null ? this.ticket_information + "\n\n" + this.ticket_message : this.ticket_message + "\n\n" + "Номер моего AnyDesk: " + this.anyDeskNumber,
           reason_id: this.reasonsActive.id
         }, {
           headers: {
@@ -491,6 +493,20 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       })["catch"](function (err) {
         return console.log(err);
       });
+    },
+    getParentId: function getParentId(value) {
+      var _this18 = this;
+      axios.post('/api/reason/parent_id', {
+        id: value
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        return _this18.parentId = res.data;
+      })["catch"](function (err) {
+        return console.log(err);
+      });
     }
   },
   mounted: function mounted() {
@@ -567,9 +583,9 @@ var render = function render() {
       transition: ""
     },
     on: {
-      "update:active": function updateActive($event) {
+      "update:active": [function ($event) {
         _vm.active = $event;
-      },
+      }, _vm.getParentId],
       "update:open": function updateOpen($event) {
         _vm.open = $event;
       }
@@ -582,15 +598,15 @@ var render = function render() {
           attrs: {
             color: "primary"
           }
-        }, [_vm._v("\n                    mdi-radiobox-marked\n                ")]) : !item.children ? _c("v-icon", {
+        }, [_vm._v("\n                        mdi-radiobox-marked\n                    ")]) : !item.children ? _c("v-icon", {
           attrs: {
             color: "black"
           }
-        }, [_vm._v("\n                    mdi-radiobox-blank\n                ")]) : _c("v-icon", {
+        }, [_vm._v("\n                        mdi-radiobox-blank\n                    ")]) : _c("v-icon", {
           attrs: {
             color: "black"
           }
-        }, [_vm._v("\n                    mdi-google-circles-extended\n                ")])];
+        }, [_vm._v("\n                        mdi-google-circles-extended\n                    ")])];
       }
     }, {
       key: "append",
@@ -605,13 +621,13 @@ var render = function render() {
               return _vm.showFormAddReason(item, true);
             }
           }
-        }, [_vm._v("\n                    mdi-pencil\n                ")]) : _vm._e(), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-icon", {
+        }, [_vm._v("\n                        mdi-pencil\n                    ")]) : _vm._e(), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-icon", {
           on: {
             click: function click($event) {
               return _vm.showFormAddReason(item);
             }
           }
-        }, [_vm._v("\n                    mdi-plus\n                ")]) : _vm._e(), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-icon", {
+        }, [_vm._v("\n                        mdi-plus\n                    ")]) : _vm._e(), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-icon", {
           attrs: {
             small: ""
           },
@@ -620,7 +636,7 @@ var render = function render() {
               return _vm.showFormAddTemplate(item);
             }
           }
-        }, [_vm._v("\n                    mdi-pencil-plus-outline\n                ")]) : _vm._e()];
+        }, [_vm._v("\n                        mdi-pencil-plus-outline\n                    ")]) : _vm._e()];
       }
     }])
   })], 1), _vm._v(" "), _c("v-col", {
@@ -629,7 +645,7 @@ var render = function render() {
       "overflow-y": "auto",
       "max-height": "calc(100vh - 60px)"
     }
-  }, [!_vm.reasonsActive || _vm.reasonsActive.children ? _c("v-row", [_c("v-col", [_c("v-card", [_c("v-card-text", [_vm._v("\n                        Выбери проблему\n                    ")])], 1)], 1)], 1) : _c("v-row", [_c("v-col", {
+  }, [!_vm.reasonsActive || _vm.reasonsActive.children ? _c("v-row", [_c("v-col", [_c("v-card", [_c("v-card-text", [_vm._v("\n                            Выбери проблему\n                        ")])], 1)], 1)], 1) : _c("v-row", [_c("v-col", {
     attrs: {
       "y-axis": "end"
     }
@@ -701,7 +717,7 @@ var render = function render() {
       on: {
         click: _vm.showFormAddImage
       }
-    }, [_vm._v("\n                                    Добавить изображение\n                                    ")]) : _vm._e()], 1), _vm._v(" "), _c("v-col", {
+    }, [_vm._v("\n                                        Добавить изображение\n                                        ")]) : _vm._e()], 1), _vm._v(" "), _c("v-col", {
       attrs: {
         cols: "6"
       }
@@ -714,7 +730,7 @@ var render = function render() {
       on: {
         click: _vm.getImage
       }
-    }, [_vm._v("\n                                        Просмотреть изображения\n                                    ")])], 1)], 1)], 1)], 1);
+    }, [_vm._v("\n                                            Просмотреть изображения\n                                        ")])], 1)], 1)], 1)], 1);
   }), 1) : _vm._e(), _vm._v(" "), !_vm.skippedHint && _vm.hints.length ? _c("v-btn", {
     staticClass: "float-right",
     attrs: {
@@ -819,6 +835,26 @@ var render = function render() {
       },
       expression: "ticket_message"
     }
+  }), _vm._v(" "), _c("v-text-field", {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: _vm.parentId === 5,
+      expression: "parentId === 5"
+    }],
+    attrs: {
+      rules: _vm.requiredRules,
+      label: "Введите номер вашего AnyDesk",
+      type: "number",
+      min: "1"
+    },
+    model: {
+      value: _vm.anyDeskNumber,
+      callback: function callback($$v) {
+        _vm.anyDeskNumber = $$v;
+      },
+      expression: "anyDeskNumber"
+    }
   }), _vm._v(" "), _c("v-row", [_c("v-col", [_c("v-btn", {
     staticClass: "mr-4",
     attrs: {
@@ -827,7 +863,7 @@ var render = function render() {
       loading: _vm.addingTicket,
       type: "submit"
     }
-  }, [_vm._v("\n                                        Добавить\n                                    ")]), _vm._v(" "), _c("v-btn", {
+  }, [_vm._v("\n                                            Добавить\n                                        ")]), _vm._v(" "), _c("v-btn", {
     attrs: {
       color: "error"
     },
@@ -836,7 +872,7 @@ var render = function render() {
         return _vm.$refs.formTicket.reset();
       }
     }
-  }, [_vm._v("\n                                        Сброс\n                                    ")]), _vm._v(" "), _vm.isManager || _vm.isAdmin ? _c("v-btn", {
+  }, [_vm._v("\n                                            Сброс\n                                        ")]), _vm._v(" "), _vm.isManager || _vm.isAdmin ? _c("v-btn", {
     staticClass: "float-right",
     attrs: {
       color: "primary"
@@ -844,7 +880,7 @@ var render = function render() {
     on: {
       click: _vm.showFormAddHint
     }
-  }, [_vm._v("\n                                        Новая подсказка\n                                    ")]) : _vm._e()], 1)], 1)], 1)], 1)], 1) : _vm._e()], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
+  }, [_vm._v("\n                                            Новая подсказка\n                                        ")]) : _vm._e()], 1)], 1)], 1)], 1)], 1) : _vm._e()], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
       persistent: "",
       "max-width": "350px"
@@ -976,21 +1012,21 @@ var render = function render() {
         _vm.newReasonDialog = false;
       }
     }
-  }, [_vm._v("\n                        Отмена\n                    ")]), _vm._v(" "), _vm.editId === null ? _c("v-btn", {
+  }, [_vm._v("\n                            Отмена\n                        ")]), _vm._v(" "), _vm.editId === null ? _c("v-btn", {
     attrs: {
       disabled: !_vm.valid,
       loading: _vm.reasonAddLoading,
       color: "success",
       type: "submit"
     }
-  }, [_vm._v("\n                        Добавить\n                    ")]) : _c("v-btn", {
+  }, [_vm._v("\n                            Добавить\n                        ")]) : _c("v-btn", {
     attrs: {
       disabled: !_vm.valid,
       loading: _vm.reasonAddLoading,
       color: "success",
       type: "submit"
     }
-  }, [_vm._v("\n                        Сохранить\n                    ")])], 1)], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
+  }, [_vm._v("\n                            Сохранить\n                        ")])], 1)], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
       width: 550
     },
@@ -1031,7 +1067,7 @@ var render = function render() {
     return _c("v-card", {
       key: template,
       staticClass: "pa-2 justify-content-between d-flex"
-    }, [_vm._v("\n                " + _vm._s(template.length > 25 ? template.slice(0, 25) + "..." : template) + "\n                "), _c("v-icon", {
+    }, [_vm._v("\n                    " + _vm._s(template.length > 25 ? template.slice(0, 25) + "..." : template) + "\n                    "), _c("v-icon", {
       staticClass: "ml-2",
       attrs: {
         color: "red"
@@ -1041,7 +1077,7 @@ var render = function render() {
           return _vm.deleteTemplate(template);
         }
       }
-    }, [_vm._v("\n                    mdi-close\n                ")])], 1);
+    }, [_vm._v("\n                        mdi-close\n                    ")])], 1);
   }), _vm._v(" "), _vm.templateResponses.length < 1 ? _c("v-card", {
     staticClass: "pa-2"
   }, [_vm._v("В данной теме шаблонные ответы отсутствуют")]) : _vm._e()], 2)], 1), _vm._v(" "), _c("v-dialog", {
@@ -1088,7 +1124,7 @@ var render = function render() {
           return _vm.deleteImage(image, id);
         }
       }
-    }, [_vm._v("\n                        mdi-close\n                    ")]) : _vm._e()], 1);
+    }, [_vm._v("\n                            mdi-close\n                        ")]) : _vm._e()], 1);
   }), _vm._v(" "), _c("v-card-actions", [_c("v-btn", {
     attrs: {
       text: ""
@@ -1173,7 +1209,7 @@ var render = function render() {
     return _c("v-card", {
       key: index,
       staticClass: "pa-1 ma-1 d-inline-block"
-    }, [_vm._v("\n                        " + _vm._s(image.name) + "\n                        "), _c("v-icon", {
+    }, [_vm._v("\n                            " + _vm._s(image.name) + "\n                            "), _c("v-icon", {
       attrs: {
         small: "",
         color: "red"
@@ -1183,7 +1219,7 @@ var render = function render() {
           return _vm.imagesForAdd.splice(index, 1);
         }
       }
-    }, [_vm._v("\n                            mdi-close\n                        ")])], 1);
+    }, [_vm._v("\n                                mdi-close\n                            ")])], 1);
   })], 2), _vm._v(" "), _c("v-card-actions", [_c("v-btn", {
     attrs: {
       text: ""
@@ -1214,7 +1250,7 @@ var render = function render() {
     }
   }, [_c("v-card", [_c("v-card-title", {
     staticClass: "text-h5"
-  }, [_vm._v("\n                Новая подсказка\n            ")]), _vm._v(" "), _c("v-form", {
+  }, [_vm._v("\n                    Новая подсказка\n                ")]), _vm._v(" "), _c("v-form", {
     ref: "formAddHint",
     attrs: {
       "lazy-validation": ""
@@ -1298,7 +1334,7 @@ var render = function render() {
         _vm.openFormAddHint = false;
       }
     }
-  }, [_vm._v("\n                        Отмена\n                    ")]), _vm._v(" "), _c("v-btn", {
+  }, [_vm._v("\n                            Отмена\n                        ")]), _vm._v(" "), _c("v-btn", {
     attrs: {
       color: "success",
       type: "submit",
@@ -1312,7 +1348,7 @@ var render = function render() {
       },
       expression: "imagesForAdd"
     }
-  }, [_vm._v("\n                        Добавить\n                    ")])], 1)], 1)], 1)], 1)], 1);
+  }, [_vm._v("\n                            Добавить\n                        ")])], 1)], 1)], 1)], 1)], 1);
 };
 var staticRenderFns = [];
 render._withStripped = true;

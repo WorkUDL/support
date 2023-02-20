@@ -232,10 +232,28 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       })["catch"](function (err) {
         return console.log(err);
       });
+    },
+    getTicketsParticipants: function getTicketsParticipants() {
+      var _this7 = this;
+      axios.post('/api/ticket/participants', {}, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        console.log(res.data);
+        res.data.forEach(function (ticket) {
+          ticket.user_id = ticket.user_id.last_name + ' ' + ticket.user_id.name + ' ' + ticket.user_id.second_name;
+          _this7.tickets.push(ticket);
+        });
+        console.log(_this7.tickets);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
     }
   },
   mounted: function mounted() {
     this.getTickets();
+    this.getTicketsParticipants();
   }
 });
 

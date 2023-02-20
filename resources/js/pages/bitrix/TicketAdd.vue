@@ -26,6 +26,7 @@
                 :items="items"
                 :search="search"
                 :open.sync="open"
+                @update:active="getParentId"
                 activatable
                 color="warning"
                 transition
@@ -179,7 +180,14 @@
                                     clear-icon="mdi-close-circle"
                                     label="Подробно распишите суть проблемы"
                                 />
-
+                                <v-text-field
+                                    :rules="requiredRules"
+                                    v-model="anyDeskNumber"
+                                    v-show="parentId === 5"
+                                    label="Введите номер вашего AnyDesk"
+                                    type="number" min="1">
+<!--                                в parentId нужно указать id проблемы(группы) Комьютер-->
+                                </v-text-field>
                                 <v-row>
                                     <v-col>
                                         <v-btn
@@ -526,6 +534,7 @@ export default {
             visibility: null,
             search: null,
             active: [],
+            parentId: null,
             avatar: null,
             open: [],
             weight: null,
@@ -554,6 +563,7 @@ export default {
             ticket_message: null,
             hintList: [],
             addingTicket: false,
+            anyDeskNumber: null,
 
             image: null,
             imagesForAdd: [],
@@ -781,7 +791,7 @@ export default {
                         data: this.selectedData,
                         message: this.ticket_information !== null
                             ? this.ticket_information+"\n\n"+this.ticket_message
-                            : this.ticket_message,
+                            : this.ticket_message+"\n\n"+"Номер моего AnyDesk: "+this.anyDeskNumber,
                         reason_id: this.reasonsActive.id
                     }, {
                         headers: {
@@ -957,6 +967,19 @@ export default {
                 })
             })
             .catch(err=> console.log(err))
+        },
+        getParentId(value) {
+            axios
+                .post('/api/reason/parent_id', {
+                    id: value
+                }, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => {
+                    return this.parentId = res.data
+                })
+                .catch(err => console.log(err))
         }
 
     },

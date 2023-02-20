@@ -432,9 +432,26 @@ export default {
                 })
                 .catch(err => console.log(err))
         },
+        getTicketsParticipants() {
+            axios
+                .post('/api/ticket/participants', {}, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res=> {
+                    console.log(res.data)
+                res.data.forEach((ticket) => {
+                    ticket.user_id = ticket.user_id.last_name + ' ' + ticket.user_id.name + ' ' + ticket.user_id.second_name
+                    this.tickets.push(ticket)
+                })
+                console.log(this.tickets)
+                })
+                .catch(err=> console.log(err))
+        }
     },
     mounted() {
         this.getTickets()
+        this.getTicketsParticipants()
     }
 }
 </script>

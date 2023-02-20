@@ -19,6 +19,7 @@ Route::group([
     Route::post('/get', [\App\Http\Controllers\TicketController::class, 'get']);
     Route::post('/add', [\App\Http\Controllers\TicketController::class, 'add']);
     Route::post('/archive', [\App\Http\Controllers\TicketController::class, 'archive']);
+    Route::post('/participants', [\App\Http\Controllers\TicketController::class, 'tickets_for_participants']);
 
 });
 
@@ -29,6 +30,7 @@ Route::group([
     Route::post('/get', [\App\Http\Controllers\ReasonController::class, 'get']);
     Route::post('/add', [\App\Http\Controllers\ReasonController::class, 'add']);
     Route::post('/information', [\App\Http\Controllers\ReasonController::class, 'information']);
+    Route::post('/parent_id', [\App\Http\Controllers\ReasonController::class, 'get_parent_id']);
 });
 
 Route::group([
@@ -128,4 +130,5 @@ Route::group([
     'prefix' => 'participant'
 ], function ($router) {
     Route::post('/list', [\App\Http\Controllers\ParticipantController::class, 'list']);
+    Route::post('/add', [\App\Http\Controllers\ParticipantController::class, 'add']);
 });

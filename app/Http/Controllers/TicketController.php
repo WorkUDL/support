@@ -36,7 +36,6 @@ class TicketController extends Controller
                 $ticket->weight = $ticket->reason->weight + ($ticket->coupon->weight ?? 0);
                 return $ticket;
             })->sortByDesc('weight')->values();
-
             return $user;
         });
 
@@ -78,6 +77,54 @@ class TicketController extends Controller
                 'created_at' => $item->created_at->getTimestamp(),
             ];
         })->values();
+    }
+
+    public function tickets_for_participants()
+    {
+        $users = User::query()->where('is_manager', 1)->get()->each(function($user) {
+            $user->ticketList = $user->tickets->map(function($ticket) {
+                $ticket->weight = $ticket->reason->weight + ($ticket->coupon->weight ?? 0);
+                return $ticket;
+            })->sortByDesc('weight')->values();
+            return $user;
+        });
+        $user_id = Auth::user()->id;
+
+        $result = Participant::select('ticket_id')
+            ->groupBy('ticket_id')
+            ->havingRaw('COUNT(*) > 2')
+            ->pluck('ticket_id');
+
+        $tickets = collect();
+
+        foreach ($result as $ticket_id) {
+            $participants = Participant::where('ticket_id', $ticket_id)
+                ->orderBy('created_at', 'asc')
+                ->get();
+            $user_ids = $participants->pluck('user_id');
+            if ($user_ids->contains($user_id)) {
+                $index = $user_ids->search($user_id);
+                if ($index > 1 && $participants[$index]->created_at > $participants[1]->created_at) {
+                    $item = Ticket::where('id', $ticket_id)->where('active', 1)->first();
+                    if ($item) {
+                        $unread = $this->checkStatus($item->id, $user_id);
+                        $user = User::where('id', $user_id)->first();
+                        $tickets->push([
+                            'id' => $item->id,
+                            'user_id' => $user,
+                            'coupon' => $item->coupon_id,
+                            'name' => 'Вас добавил администратор',
+                            'status' => $unread > 0,
+                            'queue' => $this->getQueue($item, $users), // Сделать очередь
+                            'unread' => $unread,
+                            'created_at' => $item->created_at->getTimestamp(),
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return $tickets;
     }
 
     private function getQueue($item, $users)

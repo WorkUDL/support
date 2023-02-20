@@ -106,4 +106,9 @@ class ReasonController extends Controller
 
         return null;
     }
+
+    public function get_parent_id(Request $request)
+    {
+        return Reason::where('id', $request->id)->value('parent_id');
+    }
 }
