@@ -843,7 +843,7 @@ var render = function render() {
       expression: "parentId === 5"
     }],
     attrs: {
-      rules: _vm.requiredRules,
+      rules: _vm.parentId === 5 ? _vm.requiredRules : [],
       label: "Введите номер вашего AnyDesk",
       type: "number",
       min: "1"

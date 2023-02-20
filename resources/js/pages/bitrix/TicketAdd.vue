@@ -181,7 +181,7 @@
                                     label="Подробно распишите суть проблемы"
                                 />
                                 <v-text-field
-                                    :rules="requiredRules"
+                                    :rules="parentId === 5 ? requiredRules : []"
                                     v-model="anyDeskNumber"
                                     v-show="parentId === 5"
                                     label="Введите номер вашего AnyDesk"

@@ -785,12 +785,20 @@ export default {
                 })
         },
         saveToLocalStorage() {
-            localStorage.setItem('ticketInfo', this.ticketInfo);
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('ticketInfo', this.ticketInfo);
+            } else {
+                console.warn('localStorage is not available in this browser');
+            }
         },
         loadFromLocalStorage() {
-            const ticketInfo = localStorage.getItem('ticketInfo');
-            if (ticketInfo) {
-                this.ticketInfo = (ticketInfo === 'true');
+            if (typeof localStorage !== 'undefined') {
+                const ticketInfo = localStorage.getItem('ticketInfo');
+                if (ticketInfo) {
+                    this.ticketInfo = (ticketInfo === 'true');
+                }
+            } else {
+                console.warn('localStorage is not available in this browser');
             }
         },
         transferToAnotherManager() {

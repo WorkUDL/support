@@ -401,12 +401,20 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       });
     },
     saveToLocalStorage: function saveToLocalStorage() {
-      localStorage.setItem('ticketInfo', this.ticketInfo);
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('ticketInfo', this.ticketInfo);
+      } else {
+        console.warn('localStorage is not available in this browser');
+      }
     },
     loadFromLocalStorage: function loadFromLocalStorage() {
-      var ticketInfo = localStorage.getItem('ticketInfo');
-      if (ticketInfo) {
-        this.ticketInfo = ticketInfo === 'true';
+      if (typeof localStorage !== 'undefined') {
+        var ticketInfo = localStorage.getItem('ticketInfo');
+        if (ticketInfo) {
+          this.ticketInfo = ticketInfo === 'true';
+        }
+      } else {
+        console.warn('localStorage is not available in this browser');
       }
     },
     transferToAnotherManager: function transferToAnotherManager() {
