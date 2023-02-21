@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\GroupUser;
 use App\Models\Message;
 use App\Models\MessageRead;
 use App\Models\Participant;
@@ -206,7 +207,6 @@ class TicketController extends Controller
 
     private function create($manager, $request): bool
     {
-
         if($manager->online === 1) {
             $ticket = Ticket::query()->create([
                 'user_id' => Auth::id(),
@@ -220,11 +220,47 @@ class TicketController extends Controller
                 'MESSAGE' => 'Новый тикет: [URL=/marketplace/view/120/?params[ticket_id]='.$ticket->id.']#'.$ticket->id.'[/URL]'
             ]);
         } else {
+            $groups = GroupUser::where('user_id', $manager->id)->get();
+
+            if ($groups->count() == 0) {
+                return 'Коллекция $groups пуста';
+            }
+
+            //id других менеджеров из своих групп
+            $managers_id = $groups->map(function ($group){
+                return GroupUser::where('group_id', $group->group_id)->pluck('user_id')->filter(function($user_id) {
+                    return $user_id != Auth::id();
+                });
+            });
+
+            if ($managers_id->count() == 0) {
+                return 'Коллекция $managers_id пуста';
+            }
+
+            //id других менеджеров из своих групп, которые сейчас онлайн
+            $id_online_managers_my_groups = collect($managers_id)->flatten()->map(function ($id){
+                $user = User::find($id);
+                if($user->online == 1) {
+                    return $user->id;
+                }
+            })->filter();
+
+            $id_online_managers_my_groups[] = 4;
+
+            $first_manager = $id_online_managers_my_groups->first();
+
+            $first_manager_bitrix_id = User::where('id', $first_manager)->value('bitrix_id');
+
             $ticket = Ticket::query()->create([
                 'user_id' => Auth::id(),
-                'manager_id' => 4,
+                'manager_id' => $first_manager,
                 'reason_id' => $request->reason_id,
                 'active' => 1
+            ]);
+
+            Http::post(CRest::WEBHOOK.'/im.message.add', [
+                'DIALOG_ID' => $first_manager_bitrix_id,
+                'MESSAGE' => 'Новый тикет: [URL=/marketplace/view/120/?params[ticket_id]='.$ticket->id.']#'.$ticket->id.'[/URL]'
             ]);
         }
 
