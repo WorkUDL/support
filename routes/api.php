@@ -8,7 +8,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/login', [\App\Http\Controllers\PartnerController::class, 'login']);
-
+Route::post('/ticket/add_using_token', [\App\Http\Controllers\TicketController::class, 'add']);
 //////////////////////////////////////////////////////////////////////////
 
 Route::group([

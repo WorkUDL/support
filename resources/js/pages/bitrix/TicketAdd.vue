@@ -154,7 +154,7 @@
                                     :item-value="item => item"
                                     label="Выберите город"
                                     :active="active"
-                                    v-if="active == 103"
+                                    v-if="active == 109"
                                     search-input
                                 >
                                     <!--Этот элемент привязан к id проблемы(reason) нужно заменить на актуальный id,  "==" на "===" не менять!-->
@@ -166,7 +166,7 @@
                                     :item-value="item => item"
                                     label="Выберите город"
                                     :active="active"
-                                    v-if="active == 102"
+                                    v-if="active == 108"
                                     search-input
                                 >
                                     <!--Этот элемент привязан к id проблемы(reason) нужно заменить на актуальный id,  "==" на "===" не менять!-->
@@ -597,10 +597,10 @@ export default {
     },
     watch: {
         active(newVal){
-            if(newVal == 102) {
+            if(newVal == 108) {
                 this.getListBitrixData()
             }
-            if(newVal == 103) {
+            if(newVal == 109) {
                 this.getListCallData()
             }
             if(newVal.length >= 1 && !this.reasonsList.find(user => user.id === newVal[0]).children){

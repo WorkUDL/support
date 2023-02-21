@@ -103,10 +103,10 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   watch: {
     active: function active(newVal) {
       var _this2 = this;
-      if (newVal == 102) {
+      if (newVal == 108) {
         this.getListBitrixData();
       }
-      if (newVal == 103) {
+      if (newVal == 109) {
         this.getListCallData();
       }
       if (newVal.length >= 1 && !this.reasonsList.find(function (user) {
@@ -780,7 +780,7 @@ var render = function render() {
       },
       expression: "validTicket"
     }
-  }, [_vm.active == 103 ? _c("v-select", {
+  }, [_vm.active == 109 ? _c("v-select", {
     attrs: {
       items: _vm.callData,
       "item-text": function itemText(item) {
@@ -800,7 +800,7 @@ var render = function render() {
       },
       expression: "selectedData"
     }
-  }) : _vm._e(), _vm._v(" "), _vm.active == 102 ? _c("v-select", {
+  }) : _vm._e(), _vm._v(" "), _vm.active == 108 ? _c("v-select", {
     attrs: {
       items: _vm.bitrixData,
       "item-text": function itemText(item) {

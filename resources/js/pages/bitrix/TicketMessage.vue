@@ -1,42 +1,23 @@
 <template>
     <v-col>
         <v-row style="padding-bottom: 150px;" class="message_list">
+			<v-row
+				class="pa-2"
+				style="color: #202326;justify-content: space-between;align-items: flex-start;display: flex;position: sticky;top: 64px;z-index: 1;background: white;"
+				v-if="isAdmin || isManager"
+			>
+				<v-card
+					class="pa-2 mx-auto sticky-card"
+					style="width: 100%;background: white;"
+					v-if="ticketInfo"
+				>
+						 Отдел продаж: {{departmentPosition}}
+					<br> Тема тикета: {{ reasonName }}
+					<br> Должность сотрудника: {{ workPosition }}
+					<br> б24.юдл.рф/company/personal/user/{{ userCreatedTicket }}/
+				</v-card>
+			</v-row>
             <v-list three-line style="width: 100%">
-                <template>
-                    <v-row
-                        class="pa-2"
-                        style="
-                        color: #202326;
-                        justify-content: space-between;
-                        align-items: flex-start;
-                        display: flex;"
-                    > <v-card
-                        class="pa-2"
-                        style="width: 94%;"
-                        v-if="isAdmin || isManager && ticketInfo"
-                        >
-                             Отдел продаж: {{departmentPosition}}
-                        <br> Тема тикета: {{ reasonName }}
-                        <br> Должность сотрудника: {{ workPosition }}
-                        <br> б24.юдл.рф/company/personal/user/{{ userCreatedTicket }}/
-                    </v-card>
-                    <div></div> <!-- Этот див нужен для фиксации v-switch  -->
-                        <div
-                        style="height: 30px"
-                        >
-                            <v-switch
-                                style="box-sizing: border-box;
-                                margin: 0;
-                                padding: 0;"
-                                color="info"
-                                v-model="ticketInfo"
-                                @click="saveToLocalStorage"
-                                v-if="isAdmin || isManager"
-                            >
-                            </v-switch>
-                        </div>
-                    </v-row>
-                </template>
                 <template v-for="(item, index) in items">
                     <v-list-item :key="index"
                                  v-if="item.user_id === currentUser.id"
@@ -171,15 +152,35 @@
                                         </v-icon>
                                     </v-btn>
                                     <v-btn
-                                    @click="getAllManagers"
-                                    small
-                                    fab
-                                    color="success"
+										@click="getAllManagers"
+										small
+										fab
+										color="success"
                                     >
                                         <v-icon
                                         color="white"
                                         >
                                             mdi-account-switch
+                                        </v-icon>
+                                    </v-btn>
+                                    <v-btn
+										@click="ticketInfo = !ticketInfo"
+										small
+										fab
+										v-if="isAdmin || isManager"
+										:color="ticketInfo ? 'red' : 'primary'"
+                                    >
+                                        <v-icon
+											color="white"
+											v-if="ticketInfo"
+										>
+                                            mdi-eye-off
+                                        </v-icon>
+                                        <v-icon 
+											color="white"
+											v-else
+										>
+                                            mdi-eye
                                         </v-icon>
                                     </v-btn>
                                 </v-speed-dial>
@@ -453,12 +454,7 @@ export default {
                     value: 'status',
                 }
             ],
-            ticketInfo: {
-                handler: function() {
-                    this.saveToLocalStorage();
-                },
-                deep: true,
-            },
+            ticketInfo: false,
             active: false,
             file: null,
             isFileUploading: false,
@@ -784,23 +780,6 @@ export default {
                     this.$router.push({name: 'bitrix-tickets'})
                 })
         },
-        saveToLocalStorage() {
-            if (typeof localStorage !== 'undefined') {
-                localStorage.setItem('ticketInfo', this.ticketInfo);
-            } else {
-                console.warn('localStorage is not available in this browser');
-            }
-        },
-        loadFromLocalStorage() {
-            if (typeof localStorage !== 'undefined') {
-                const ticketInfo = localStorage.getItem('ticketInfo');
-                if (ticketInfo) {
-                    this.ticketInfo = (ticketInfo === 'true');
-                }
-            } else {
-                console.warn('localStorage is not available in this browser');
-            }
-        },
         transferToAnotherManager() {
             axios
                 .post('/api/user/transfer_manager_inside_dialog', {
@@ -832,7 +811,6 @@ export default {
     },
 
     mounted() {
-        this.loadFromLocalStorage()
         this.getTicket()
         this.getMessages()
         this.getReasonName()

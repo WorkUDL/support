@@ -64,12 +64,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         text: 'Статус',
         value: 'status'
       }],
-      ticketInfo: {
-        handler: function handler() {
-          this.saveToLocalStorage();
-        },
-        deep: true
-      },
+      ticketInfo: false,
       active: false,
       file: null,
       isFileUploading: false,
@@ -400,23 +395,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         });
       });
     },
-    saveToLocalStorage: function saveToLocalStorage() {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('ticketInfo', this.ticketInfo);
-      } else {
-        console.warn('localStorage is not available in this browser');
-      }
-    },
-    loadFromLocalStorage: function loadFromLocalStorage() {
-      if (typeof localStorage !== 'undefined') {
-        var ticketInfo = localStorage.getItem('ticketInfo');
-        if (ticketInfo) {
-          this.ticketInfo = ticketInfo === 'true';
-        }
-      } else {
-        console.warn('localStorage is not available in this browser');
-      }
-    },
     transferToAnotherManager: function transferToAnotherManager() {
       axios.post('/api/user/transfer_manager_inside_dialog', {
         user_id: this.currentUser.id,
@@ -452,7 +430,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     }
   },
   mounted: function mounted() {
-    this.loadFromLocalStorage();
     this.getTicket();
     this.getMessages();
     this.getReasonName();
@@ -540,7 +517,14 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         text: 'Действия',
         sortable: false,
         value: 'actions'
-      }]
+      }],
+      sortBy: null,
+      sortDesc: null,
+      filters: {
+        search: null,
+        sortBy: [],
+        sortDesc: []
+      }
     };
   },
   computed: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['currentUser', 'currentToken', 'isAdmin', 'isManager'])), {}, {
@@ -727,13 +711,12 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       });
     },
     loadFiltersFromLocalStorage: function loadFiltersFromLocalStorage() {
-      var filters = JSON.parse(localStorage.getItem('myFilters')) || {};
-      this.filters = filters;
-      if (filters.sortBy) {
-        this.sortBy = filters.sortBy;
+      this.filters = JSON.parse(localStorage.getItem('myFilters')) || {};
+      if (this.filters.sortBy) {
+        this.sortBy = this.filters.sortBy;
       }
-      if (filters.sortDesc) {
-        this.sortDesc = filters.sortDesc;
+      if (this.filters.sortDesc) {
+        this.sortDesc = this.filters.sortDesc;
       }
     },
     saveFiltersToLocalStorage: function saveFiltersToLocalStorage() {
@@ -859,50 +842,32 @@ var render = function render() {
     staticStyle: {
       "padding-bottom": "150px"
     }
-  }, [_c("v-list", {
+  }, [_vm.isAdmin || _vm.isManager ? _c("v-row", {
+    staticClass: "pa-2",
+    staticStyle: {
+      color: "#202326",
+      "justify-content": "space-between",
+      "align-items": "flex-start",
+      display: "flex",
+      position: "sticky",
+      top: "64px",
+      "z-index": "1",
+      background: "white"
+    }
+  }, [_vm.ticketInfo ? _c("v-card", {
+    staticClass: "pa-2 mx-auto sticky-card",
+    staticStyle: {
+      width: "100%",
+      background: "white"
+    }
+  }, [_vm._v("\n\t\t\t\t\t\t Отдел продаж: " + _vm._s(_vm.departmentPosition) + "\n\t\t\t\t\t"), _c("br"), _vm._v(" Тема тикета: " + _vm._s(_vm.reasonName) + "\n\t\t\t\t\t"), _c("br"), _vm._v(" Должность сотрудника: " + _vm._s(_vm.workPosition) + "\n\t\t\t\t\t"), _c("br"), _vm._v(" б24.юдл.рф/company/personal/user/" + _vm._s(_vm.userCreatedTicket) + "/\n\t\t\t\t")]) : _vm._e()], 1) : _vm._e(), _vm._v(" "), _c("v-list", {
     staticStyle: {
       width: "100%"
     },
     attrs: {
       "three-line": ""
     }
-  }, [[_c("v-row", {
-    staticClass: "pa-2",
-    staticStyle: {
-      color: "#202326",
-      "justify-content": "space-between",
-      "align-items": "flex-start",
-      display: "flex"
-    }
-  }, [_vm.isAdmin || _vm.isManager && _vm.ticketInfo ? _c("v-card", {
-    staticClass: "pa-2",
-    staticStyle: {
-      width: "94%"
-    }
-  }, [_vm._v("\n                         Отдел продаж: " + _vm._s(_vm.departmentPosition) + "\n                    "), _c("br"), _vm._v(" Тема тикета: " + _vm._s(_vm.reasonName) + "\n                    "), _c("br"), _vm._v(" Должность сотрудника: " + _vm._s(_vm.workPosition) + "\n                    "), _c("br"), _vm._v(" б24.юдл.рф/company/personal/user/" + _vm._s(_vm.userCreatedTicket) + "/\n                ")]) : _vm._e(), _vm._v(" "), _c("div"), _vm._v(" "), _c("div", {
-    staticStyle: {
-      height: "30px"
-    }
-  }, [_vm.isAdmin || _vm.isManager ? _c("v-switch", {
-    staticStyle: {
-      "box-sizing": "border-box",
-      margin: "0",
-      padding: "0"
-    },
-    attrs: {
-      color: "info"
-    },
-    on: {
-      click: _vm.saveToLocalStorage
-    },
-    model: {
-      value: _vm.ticketInfo,
-      callback: function callback($$v) {
-        _vm.ticketInfo = $$v;
-      },
-      expression: "ticketInfo"
-    }
-  }) : _vm._e()], 1)], 1)], _vm._v(" "), _vm._l(_vm.items, function (item, index) {
+  }, [_vm._l(_vm.items, function (item, index) {
     return [item.user_id === _vm.currentUser.id ? _c("v-list-item", {
       key: index
     }, [_c("v-list-item-content", {
@@ -928,7 +893,7 @@ var render = function render() {
           _vm.currentImg = item.message;
         }
       }
-    })]) : _vm._e()]), _vm._v(" "), _c("v-list-item-subtitle", [_vm._v("\n                            " + _vm._s(new Date(item.date).toLocaleString()) + "\n                        ")])], 1), _vm._v(" "), _c("v-list-item-avatar", {
+    })]) : _vm._e()]), _vm._v(" "), _c("v-list-item-subtitle", [_vm._v("\n                                " + _vm._s(new Date(item.date).toLocaleString()) + "\n                            ")])], 1), _vm._v(" "), _c("v-list-item-avatar", {
       staticClass: "float-right"
     }, [_c("v-img", {
       attrs: {
@@ -971,7 +936,7 @@ var render = function render() {
       }
     })]) : _vm._e()]), _vm._v(" "), _c("v-list-item-subtitle", {
       staticClass: "grey--text caption"
-    }, [_vm._v("\n                            " + _vm._s(new Date(item.date).toLocaleString()) + "\n                        ")])], 1)], 1)];
+    }, [_vm._v("\n                                " + _vm._s(new Date(item.date).toLocaleString()) + "\n                            ")])], 1)], 1)];
   })], 2)], 1), _vm._v(" "), _vm.active ? _c("v-row", {
     staticClass: "sticky-bottom"
   }, [_c("v-col", [_c("v-card", {
@@ -1008,7 +973,7 @@ var render = function render() {
         },
         expression: "message"
       }
-    }, [_vm._v("\n                        " + _vm._s(template.length > 35 ? template.slice(0, 35) + "..." : template) + "\n                    ")]) : _vm._e()]);
+    }, [_vm._v("\n                            " + _vm._s(template.length > 35 ? template.slice(0, 35) + "..." : template) + "\n                        ")]) : _vm._e()]);
   }), 0), _vm._v(" "), _c("v-card", {
     staticStyle: {
       padding: "12px 12px 0 12px"
@@ -1093,7 +1058,7 @@ var render = function render() {
           attrs: {
             color: "white"
           }
-        }, [_vm._v("\n                                        mdi-delete\n                                    ")])], 1), _vm._v(" "), _c("v-btn", {
+        }, [_vm._v("\n                                            mdi-delete\n                                        ")])], 1), _vm._v(" "), _c("v-btn", {
           attrs: {
             loading: _vm.loadingParticipants,
             fab: "",
@@ -1107,7 +1072,7 @@ var render = function render() {
           attrs: {
             color: "white"
           }
-        }, [_vm._v("\n                                        mdi-account-supervisor\n                                    ")])], 1), _vm._v(" "), _c("v-btn", {
+        }, [_vm._v("\n                                            mdi-account-supervisor\n                                        ")])], 1), _vm._v(" "), _c("v-btn", {
           attrs: {
             small: "",
             fab: "",
@@ -1120,7 +1085,26 @@ var render = function render() {
           attrs: {
             color: "white"
           }
-        }, [_vm._v("\n                                        mdi-account-switch\n                                    ")])], 1)], 1)], 1), _vm._v(" "), _c("v-btn", {
+        }, [_vm._v("\n                                            mdi-account-switch\n                                        ")])], 1), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-btn", {
+          attrs: {
+            small: "",
+            fab: "",
+            color: _vm.ticketInfo ? "red" : "primary"
+          },
+          on: {
+            click: function click($event) {
+              _vm.ticketInfo = !_vm.ticketInfo;
+            }
+          }
+        }, [_vm.ticketInfo ? _c("v-icon", {
+          attrs: {
+            color: "white"
+          }
+        }, [_vm._v("\n                                            mdi-eye-off\n                                        ")]) : _c("v-icon", {
+          attrs: {
+            color: "white"
+          }
+        }, [_vm._v("\n                                            mdi-eye\n                                        ")])], 1) : _vm._e()], 1)], 1), _vm._v(" "), _c("v-btn", {
           staticClass: "mx-2",
           staticStyle: {
             bottom: "10px",
@@ -1141,10 +1125,10 @@ var render = function render() {
           attrs: {
             dark: ""
           }
-        }, [_vm._v("\n                                mdi-send\n                            ")])], 1)];
+        }, [_vm._v("\n                                    mdi-send\n                                ")])], 1)];
       },
       proxy: true
-    }], null, false, 130455134),
+    }], null, false, 4184109951),
     model: {
       value: _vm.message,
       callback: function callback($$v) {
@@ -1189,7 +1173,7 @@ var render = function render() {
         _vm.dialogForTransfer = false;
       }
     }
-  }, [_vm._v("\n                Отменить\n            ")]), _vm._v(" "), _c("v-btn", {
+  }, [_vm._v("\n                    Отменить\n                ")]), _vm._v(" "), _c("v-btn", {
     staticClass: "ma-2",
     attrs: {
       color: "success"
@@ -1197,7 +1181,7 @@ var render = function render() {
     on: {
       click: _vm.transferToAnotherManager
     }
-  }, [_vm._v("\n                Отправить\n            ")])], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
+  }, [_vm._v("\n                    Отправить\n                ")])], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
       "max-width": "600px"
     },
@@ -1220,13 +1204,13 @@ var render = function render() {
       key: "item.user_id",
       fn: function fn(_ref) {
         var item = _ref.item;
-        return [_vm._v("\n                    " + _vm._s(_vm.getUser(item)) + "\n                ")];
+        return [_vm._v("\n                        " + _vm._s(_vm.getUser(item)) + "\n                    ")];
       }
     }, {
       key: "item.status",
       fn: function fn(_ref2) {
         var item = _ref2.item;
-        return [_vm._v("\n                    " + _vm._s(_vm.participantStatuses[item.status] || _vm.participantStatuses[0]) + "\n                ")];
+        return [_vm._v("\n                        " + _vm._s(_vm.participantStatuses[item.status] || _vm.participantStatuses[0]) + "\n                    ")];
       }
     }])
   }), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-card-actions", [_c("v-spacer"), _vm._v(" "), _c("v-btn", {
@@ -1239,7 +1223,7 @@ var render = function render() {
         _vm.showParticipants = false;
       }
     }
-  }, [_vm._v("\n                    Отмена\n                ")]), _vm._v(" "), _c("v-btn", {
+  }, [_vm._v("\n                        Отмена\n                    ")]), _vm._v(" "), _c("v-btn", {
     attrs: {
       color: "success"
     },
@@ -1248,7 +1232,7 @@ var render = function render() {
         _vm.newParticipantForm = true;
       }
     }
-  }, [_vm._v("\n                    Добавить\n                ")])], 1) : _vm._e()], 1)], 1), _vm._v(" "), _c("v-dialog", {
+  }, [_vm._v("\n                        Добавить\n                    ")])], 1) : _vm._e()], 1)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
       persistent: "",
       scrollable: "",
@@ -1314,7 +1298,7 @@ var render = function render() {
           attrs: {
             src: item.photo
           }
-        })], 1), _vm._v(" "), _c("v-list-item-content", [_c("v-list-item-title", [_vm._v("\n                                    " + _vm._s(item.name) + "\n                                ")]), _vm._v(" "), _c("v-list-item-subtitle", [_vm._v("\n                                    " + _vm._s(item.work_position) + "\n                                ")])], 1)];
+        })], 1), _vm._v(" "), _c("v-list-item-content", [_c("v-list-item-title", [_vm._v("\n                                        " + _vm._s(item.name) + "\n                                    ")]), _vm._v(" "), _c("v-list-item-subtitle", [_vm._v("\n                                        " + _vm._s(item.work_position) + "\n                                    ")])], 1)];
       }
     }, {
       key: "selection",
@@ -1339,7 +1323,7 @@ var render = function render() {
           attrs: {
             src: item.photo
           }
-        })], 1), _vm._v("\n                                " + _vm._s(item.name) + "\n                            ")], 1)];
+        })], 1), _vm._v("\n                                    " + _vm._s(item.name) + "\n                                ")], 1)];
       }
     }]),
     model: {
@@ -1363,14 +1347,14 @@ var render = function render() {
         _vm.newParticipantForm = false;
       }
     }
-  }, [_vm._v("\n                        Отмена\n                    ")]), _vm._v(" "), _c("v-btn", {
+  }, [_vm._v("\n                            Отмена\n                        ")]), _vm._v(" "), _c("v-btn", {
     attrs: {
       color: "success",
       disabled: !_vm.newParticipantFormValid || _vm.newParticipantFormLoading,
       loading: _vm.newParticipantFormLoading,
       type: "submit"
     }
-  }, [_vm._v("\n                        Добавить\n                    ")])], 1)], 1)], 1)], 1), _vm._v(" "), [_c("v-row", {
+  }, [_vm._v("\n                            Добавить\n                        ")])], 1)], 1)], 1)], 1), _vm._v(" "), [_c("v-row", {
     attrs: {
       justify: "center"
     }
@@ -1387,7 +1371,7 @@ var render = function render() {
     }
   }, [_c("v-card", [_c("v-card-title", {
     staticClass: "text-h5"
-  }, [_vm._v("\n                        Подтверждение\n                    ")]), _vm._v(" "), _c("v-card-text", [_vm._v("\n                        Завершить работу с тикетом и отправить его в архив?\n                    ")]), _vm._v(" "), _c("v-card-actions", [_c("v-spacer"), _vm._v(" "), _c("v-btn", {
+  }, [_vm._v("\n                            Подтверждение\n                        ")]), _vm._v(" "), _c("v-card-text", [_vm._v("\n                            Завершить работу с тикетом и отправить его в архив?\n                        ")]), _vm._v(" "), _c("v-card-actions", [_c("v-spacer"), _vm._v(" "), _c("v-btn", {
     attrs: {
       text: ""
     },
@@ -1396,7 +1380,7 @@ var render = function render() {
         _vm.openDialog = false;
       }
     }
-  }, [_vm._v("\n                            Отмена\n                        ")]), _vm._v(" "), _c("v-btn", {
+  }, [_vm._v("\n                                Отмена\n                            ")]), _vm._v(" "), _c("v-btn", {
     attrs: {
       color: "red",
       dark: ""
@@ -1404,7 +1388,7 @@ var render = function render() {
     on: {
       click: _vm.toArchive
     }
-  }, [_vm._v("\n                           В архив\n                        ")])], 1)], 1)], 1)], 1)], _vm._v(" "), [_c("v-dialog", {
+  }, [_vm._v("\n                               В архив\n                            ")])], 1)], 1)], 1)], 1)], _vm._v(" "), [_c("v-dialog", {
     attrs: {
       "max-width": "1000"
     },
@@ -1480,14 +1464,10 @@ var render = function render() {
       "items-per-page": 15,
       "item-key": "id",
       search: _vm.filters.search,
-      pagination: _vm.filters.pagination,
       "sort-by": _vm.sortBy,
       "sort-desc": _vm.sortDesc
     },
     on: {
-      "update:pagination": function updatePagination($event) {
-        return _vm.$set(_vm.filters, "pagination", $event);
-      },
       "update:sortBy": function updateSortBy($event) {
         _vm.sortBy = $event;
       },

@@ -9,7 +9,6 @@
             item-key="id"
             class="elevation-1"
             :search="filters.search"
-            :pagination.sync="filters.pagination"
             :sort-by.sync="sortBy"
             :sort-desc.sync="sortDesc"
         >
@@ -221,7 +220,6 @@
 
 <script>
 import {mapState} from "vuex";
-
 export default {
     name: "Success",
     data() {
@@ -280,6 +278,13 @@ export default {
                     value: 'actions'
                 }
             ],
+			sortBy: null,
+			sortDesc: null,
+			filters: {
+				search: null,
+				sortBy: [],
+				sortDesc: [],
+			}
         }
     },
     computed: {
@@ -336,11 +341,9 @@ export default {
             if(this.$refs.couponForm){
                 this.$refs.couponForm.reset()
             }
-
             this.openCoupon = true
             this.couponCodesLoading = true
             this.ticketAction = ticket.id
-
             axios.post('/api/coupon/list', {}, {
                 headers: {
                     Authorization: 'Bearer '+this.currentToken
@@ -356,7 +359,6 @@ export default {
         ApplyCoupon(){
             if(this.$refs.couponForm.validate()){
                 this.loadingCouponForm = true
-
                 axios
                     .post('/api/coupon/apply', {
                         ticket_id: this.ticketAction,
@@ -381,7 +383,6 @@ export default {
         },
         transferToArchive(){
             this.transferingToArchive = true
-
             axios
                 .post('/api/ticket/archive', {
                     id: this.ticketAction,
@@ -400,7 +401,6 @@ export default {
         },
         getTickets(){
                 this.loadingTickets = true
-
                 axios
                     .post('/api/ticket/list', {}, {
                         headers: {
@@ -419,7 +419,6 @@ export default {
                     })
                     .catch(err => console.error(err))
                     .finally(() => this.loadingTickets = false)
-
         },
         setOnline(status) {
             axios
@@ -453,13 +452,13 @@ export default {
                 .catch(err=> console.log(err))
         },
         loadFiltersFromLocalStorage() {
-            const filters = JSON.parse(localStorage.getItem('myFilters')) || {};
-            this.filters = filters;
-            if (filters.sortBy) {
-                this.sortBy = filters.sortBy;
+            this.filters = JSON.parse(localStorage.getItem('myFilters')) || {};
+			
+            if (this.filters.sortBy) {
+                this.sortBy = this.filters.sortBy;
             }
-            if (filters.sortDesc) {
-                this.sortDesc = filters.sortDesc;
+            if (this.filters.sortDesc) {
+                this.sortDesc = this.filters.sortDesc;
             }
         },
         saveFiltersToLocalStorage() {
@@ -480,7 +479,5 @@ export default {
     }
 }
 </script>
-
 <style scoped>
-
 </style>

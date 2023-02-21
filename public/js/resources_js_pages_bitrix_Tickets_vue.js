@@ -64,7 +64,14 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         text: 'Действия',
         sortable: false,
         value: 'actions'
-      }]
+      }],
+      sortBy: null,
+      sortDesc: null,
+      filters: {
+        search: null,
+        sortBy: [],
+        sortDesc: []
+      }
     };
   },
   computed: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['currentUser', 'currentToken', 'isAdmin', 'isManager'])), {}, {
@@ -251,13 +258,12 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       });
     },
     loadFiltersFromLocalStorage: function loadFiltersFromLocalStorage() {
-      var filters = JSON.parse(localStorage.getItem('myFilters')) || {};
-      this.filters = filters;
-      if (filters.sortBy) {
-        this.sortBy = filters.sortBy;
+      this.filters = JSON.parse(localStorage.getItem('myFilters')) || {};
+      if (this.filters.sortBy) {
+        this.sortBy = this.filters.sortBy;
       }
-      if (filters.sortDesc) {
-        this.sortDesc = filters.sortDesc;
+      if (this.filters.sortDesc) {
+        this.sortDesc = this.filters.sortDesc;
       }
     },
     saveFiltersToLocalStorage: function saveFiltersToLocalStorage() {
@@ -305,14 +311,10 @@ var render = function render() {
       "items-per-page": 15,
       "item-key": "id",
       search: _vm.filters.search,
-      pagination: _vm.filters.pagination,
       "sort-by": _vm.sortBy,
       "sort-desc": _vm.sortDesc
     },
     on: {
-      "update:pagination": function updatePagination($event) {
-        return _vm.$set(_vm.filters, "pagination", $event);
-      },
       "update:sortBy": function updateSortBy($event) {
         _vm.sortBy = $event;
       },
