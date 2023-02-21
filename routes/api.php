@@ -30,7 +30,7 @@ Route::group([
     Route::post('/get', [\App\Http\Controllers\ReasonController::class, 'get']);
     Route::post('/add', [\App\Http\Controllers\ReasonController::class, 'add']);
     Route::post('/information', [\App\Http\Controllers\ReasonController::class, 'information']);
-    Route::post('/parent_id', [\App\Http\Controllers\ReasonController::class, 'get_parent_id']);
+    Route::post('/get_parent_id', [\App\Http\Controllers\ReasonController::class, 'get_parent_id']);
 });
 
 Route::group([

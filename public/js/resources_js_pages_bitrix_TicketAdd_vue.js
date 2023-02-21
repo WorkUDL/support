@@ -497,7 +497,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     getParentId: function getParentId(value) {
       var _this18 = this;
-      axios.post('/api/reason/parent_id', {
+      axios.post('/api/reason/get_parent_id', {
         id: value
       }, {
         headers: {

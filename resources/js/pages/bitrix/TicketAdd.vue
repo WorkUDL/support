@@ -973,7 +973,7 @@ export default {
         },
         getParentId(value) {
             axios
-                .post('/api/reason/parent_id', {
+                .post('/api/reason/get_parent_id', {
                     id: value
                 }, {
                     headers: {
