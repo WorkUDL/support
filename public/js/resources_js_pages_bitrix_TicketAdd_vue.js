@@ -302,7 +302,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         this.addingTicket = true;
         axios.post('/api/ticket/add', {
           data: this.selectedData,
-          message: this.ticket_information !== null ? this.ticket_information + "\n\n" + this.ticket_message : this.ticket_message + "\n\n" + "Номер моего AnyDesk: " + this.anyDeskNumber,
+          message: this.ticket_information !== null ? this.ticket_information + "\n\n" + this.ticket_message : this.ticket_message + (this.anyDeskNumber ? "\n\n" + "Номер моего AnyDesk: " + this.anyDeskNumber : ""),
           reason_id: this.reasonsActive.id
         }, {
           headers: {
@@ -316,7 +316,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         })["catch"](function (err) {
           return _this10.$store.dispatch('notice', err.response.data.error);
         })["finally"](function () {
-          return _this10.addingTicket = false;
+          _this10.addingTicket = false;
+          _this10.anyDeskNumber = null;
         });
       }
     },

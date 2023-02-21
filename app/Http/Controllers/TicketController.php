@@ -81,13 +81,6 @@ class TicketController extends Controller
 
     public function tickets_for_participants()
     {
-        $users = User::query()->where('is_manager', 1)->get()->each(function($user) {
-            $user->ticketList = $user->tickets->map(function($ticket) {
-                $ticket->weight = $ticket->reason->weight + ($ticket->coupon->weight ?? 0);
-                return $ticket;
-            })->sortByDesc('weight')->values();
-            return $user;
-        });
         $user_id = Auth::user()->id;
 
         $result = Participant::select('ticket_id')
@@ -115,7 +108,7 @@ class TicketController extends Controller
                             'coupon' => $item->coupon_id,
                             'name' => 'Вас добавил администратор',
                             'status' => $unread > 0,
-                            'queue' => $this->getQueue($item, $users), // Сделать очередь
+                            'queue' => 0,
                             'unread' => $unread,
                             'created_at' => $item->created_at->getTimestamp(),
                         ]);
@@ -207,7 +200,7 @@ class TicketController extends Controller
                 $ticket->weight = $reason->weight + ($coupon ? $coupon->weight : 0);
                 return $ticket;
             })->sum('weight');
-            $manager->bitrix_id = 2332;
+//            $manager->bitrix_id = 2332;
         })->sortBy('weight')->values()->first(), $request);
     }
 

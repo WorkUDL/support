@@ -8,6 +8,10 @@
             :items-per-page="15"
             item-key="id"
             class="elevation-1"
+            :search="filters.search"
+            :pagination.sync="filters.pagination"
+            :sort-by.sync="sortBy"
+            :sort-desc.sync="sortDesc"
         >
             <template v-slot:item.status="{ item }">
                 <span v-if="item.status" class="green--text">Новое сообщение</span>
@@ -447,11 +451,32 @@ export default {
                 console.log(this.tickets)
                 })
                 .catch(err=> console.log(err))
+        },
+        loadFiltersFromLocalStorage() {
+            const filters = JSON.parse(localStorage.getItem('myFilters')) || {};
+            this.filters = filters;
+            if (filters.sortBy) {
+                this.sortBy = filters.sortBy;
+            }
+            if (filters.sortDesc) {
+                this.sortDesc = filters.sortDesc;
+            }
+        },
+        saveFiltersToLocalStorage() {
+            window.addEventListener('beforeunload', () => {
+                this.filters.sortBy = this.sortBy;
+                this.filters.sortDesc = this.sortDesc;
+                localStorage.setItem('myFilters', JSON.stringify(this.filters));
+            });
         }
+    },
+    created() {
+        this.loadFiltersFromLocalStorage()
     },
     mounted() {
         this.getTickets()
         this.getTicketsParticipants()
+        this.saveFiltersToLocalStorage()
     }
 }
 </script>

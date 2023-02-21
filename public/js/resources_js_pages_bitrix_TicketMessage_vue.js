@@ -725,11 +725,33 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       })["catch"](function (err) {
         return console.log(err);
       });
+    },
+    loadFiltersFromLocalStorage: function loadFiltersFromLocalStorage() {
+      var filters = JSON.parse(localStorage.getItem('myFilters')) || {};
+      this.filters = filters;
+      if (filters.sortBy) {
+        this.sortBy = filters.sortBy;
+      }
+      if (filters.sortDesc) {
+        this.sortDesc = filters.sortDesc;
+      }
+    },
+    saveFiltersToLocalStorage: function saveFiltersToLocalStorage() {
+      var _this8 = this;
+      window.addEventListener('beforeunload', function () {
+        _this8.filters.sortBy = _this8.sortBy;
+        _this8.filters.sortDesc = _this8.sortDesc;
+        localStorage.setItem('myFilters', JSON.stringify(_this8.filters));
+      });
     }
+  },
+  created: function created() {
+    this.loadFiltersFromLocalStorage();
   },
   mounted: function mounted() {
     this.getTickets();
     this.getTicketsParticipants();
+    this.saveFiltersToLocalStorage();
   }
 });
 
@@ -1456,7 +1478,28 @@ var render = function render() {
       loading: _vm.loadingTickets,
       "multi-sort": "",
       "items-per-page": 15,
-      "item-key": "id"
+      "item-key": "id",
+      search: _vm.filters.search,
+      pagination: _vm.filters.pagination,
+      "sort-by": _vm.sortBy,
+      "sort-desc": _vm.sortDesc
+    },
+    on: {
+      "update:pagination": function updatePagination($event) {
+        return _vm.$set(_vm.filters, "pagination", $event);
+      },
+      "update:sortBy": function updateSortBy($event) {
+        _vm.sortBy = $event;
+      },
+      "update:sort-by": function updateSortBy($event) {
+        _vm.sortBy = $event;
+      },
+      "update:sortDesc": function updateSortDesc($event) {
+        _vm.sortDesc = $event;
+      },
+      "update:sort-desc": function updateSortDesc($event) {
+        _vm.sortDesc = $event;
+      }
     },
     scopedSlots: _vm._u([{
       key: "item.status",

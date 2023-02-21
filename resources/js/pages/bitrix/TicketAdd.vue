@@ -791,7 +791,7 @@ export default {
                         data: this.selectedData,
                         message: this.ticket_information !== null
                             ? this.ticket_information+"\n\n"+this.ticket_message
-                            : this.ticket_message+"\n\n"+"Номер моего AnyDesk: "+this.anyDeskNumber,
+                            : this.ticket_message + (this.anyDeskNumber ? "\n\n" + "Номер моего AnyDesk: " + this.anyDeskNumber : ""),
                         reason_id: this.reasonsActive.id
                     }, {
                         headers: {
@@ -806,7 +806,10 @@ export default {
                     }
                         )
                     .catch(err => this.$store.dispatch('notice', err.response.data.error))
-                    .finally(() => this.addingTicket = false)
+                    .finally(() => {
+                        this.addingTicket = false
+                        this.anyDeskNumber = null
+                    })
             }
         },
         getHint(item) {
