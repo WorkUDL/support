@@ -427,6 +427,34 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       })["catch"](function (err) {
         return console.log(err);
       });
+    },
+    displayTicketInfo: function displayTicketInfo() {
+      this.ticketInfo = !this.ticketInfo;
+      axios.post('/api/ticket_filter/add_ticket_filters', {
+        filter: this.ticketInfo
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        return console.log(res);
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    uploadTicketInfo: function uploadTicketInfo() {
+      var _this15 = this;
+      axios.post('/api/ticket_filter/get_ticket_filters', {
+        userId: this.currentUser.id
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        return _this15.ticketInfo = res.data;
+      })["catch"](function (err) {
+        return console.log(err);
+      });
     }
   },
   mounted: function mounted() {
@@ -435,6 +463,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     this.getReasonName();
     this.dataOfCreator();
     this.getTemplates();
+    this.uploadTicketInfo();
     this.$socket.emit('messages', {
       ticket_id: this.ticket_id
     }, function (response) {
@@ -846,18 +875,18 @@ var render = function render() {
     staticClass: "pa-2",
     staticStyle: {
       color: "#202326",
-      "justify-content": "space-between",
+      "justify-content": "center",
       "align-items": "flex-start",
       display: "flex",
       position: "sticky",
       top: "64px",
       "z-index": "1",
-      background: "white"
+      background: "none"
     }
   }, [_vm.ticketInfo ? _c("v-card", {
     staticClass: "pa-2 mx-auto sticky-card",
     staticStyle: {
-      width: "100%",
+      width: "fit-content",
       background: "white"
     }
   }, [_vm._v("\n\t\t\t\t\t\t Отдел продаж: " + _vm._s(_vm.departmentPosition) + "\n\t\t\t\t\t"), _c("br"), _vm._v(" Тема тикета: " + _vm._s(_vm.reasonName) + "\n\t\t\t\t\t"), _c("br"), _vm._v(" Должность сотрудника: " + _vm._s(_vm.workPosition) + "\n\t\t\t\t\t"), _c("br"), _vm._v(" б24.юдл.рф/company/personal/user/" + _vm._s(_vm.userCreatedTicket) + "/\n\t\t\t\t")]) : _vm._e()], 1) : _vm._e(), _vm._v(" "), _c("v-list", {
@@ -1092,9 +1121,7 @@ var render = function render() {
             color: _vm.ticketInfo ? "red" : "primary"
           },
           on: {
-            click: function click($event) {
-              _vm.ticketInfo = !_vm.ticketInfo;
-            }
+            click: _vm.displayTicketInfo
           }
         }, [_vm.ticketInfo ? _c("v-icon", {
           attrs: {
@@ -1128,7 +1155,7 @@ var render = function render() {
         }, [_vm._v("\n                                    mdi-send\n                                ")])], 1)];
       },
       proxy: true
-    }], null, false, 4184109951),
+    }], null, false, 3919678718),
     model: {
       value: _vm.message,
       callback: function callback($$v) {

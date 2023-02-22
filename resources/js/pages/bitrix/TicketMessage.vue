@@ -3,12 +3,12 @@
         <v-row style="padding-bottom: 150px;" class="message_list">
 			<v-row
 				class="pa-2"
-				style="color: #202326;justify-content: space-between;align-items: flex-start;display: flex;position: sticky;top: 64px;z-index: 1;background: white;"
+				style="color: #202326;justify-content: center;align-items: flex-start;display: flex;position: sticky;top: 64px;z-index: 1;background: none;"
 				v-if="isAdmin || isManager"
 			>
 				<v-card
 					class="pa-2 mx-auto sticky-card"
-					style="width: 100%;background: white;"
+					style="width: fit-content;background: white;"
 					v-if="ticketInfo"
 				>
 						 Отдел продаж: {{departmentPosition}}
@@ -164,7 +164,7 @@
                                         </v-icon>
                                     </v-btn>
                                     <v-btn
-										@click="ticketInfo = !ticketInfo"
+										@click="displayTicketInfo"
 										small
 										fab
 										v-if="isAdmin || isManager"
@@ -176,7 +176,7 @@
 										>
                                             mdi-eye-off
                                         </v-icon>
-                                        <v-icon 
+                                        <v-icon
 											color="white"
 											v-else
 										>
@@ -808,6 +808,26 @@ export default {
             })
                 .catch(err => console.log(err))
         },
+        displayTicketInfo() {
+            this.ticketInfo = !this.ticketInfo
+            axios
+                .post('/api/ticket_filter/add_ticket_filters', {filter: this.ticketInfo}, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => console.log(res))
+                .catch(err => console.log(err))
+        },
+        uploadTicketInfo() {
+            axios
+                .post('/api/ticket_filter/get_ticket_filters', {userId: this.currentUser.id}, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => this.ticketInfo = res.data)
+                .catch(err => console.log(err))
+        }
+
     },
 
     mounted() {
@@ -816,6 +836,7 @@ export default {
         this.getReasonName()
         this.dataOfCreator()
         this.getTemplates()
+        this.uploadTicketInfo()
 
         this.$socket.emit('messages', {
             ticket_id: this.ticket_id

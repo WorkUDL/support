@@ -18,7 +18,9 @@ import Bitrix24 from "bitrix24-vue";
 import VueSocketIO from 'vue-socket.io'
 import { io } from 'socket.io-client'
 import VueBbob from '@bbob/vue2';
+import VueCookies from 'vue-cookies';
 
+Vue.use(VueCookies);
 Vue.use(VueBbob);
 Vue.use(Bitrix24)
 Vue.component('navbar', require('./components/Navbar').default)

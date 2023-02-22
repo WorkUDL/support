@@ -132,3 +132,11 @@ Route::group([
     Route::post('/list', [\App\Http\Controllers\ParticipantController::class, 'list']);
     Route::post('/add', [\App\Http\Controllers\ParticipantController::class, 'add']);
 });
+
+Route::group([
+    'middleware' => 'auth:sanctum',
+    'prefix' => 'ticket_filter'
+], function ($router) {
+    Route::post('/add_ticket_filters', [\App\Http\Controllers\TicketFilterController::class, 'add_ticket_filters']);
+    Route::post('/get_ticket_filters', [\App\Http\Controllers\TicketFilterController::class, 'get_ticket_filters']);
+});

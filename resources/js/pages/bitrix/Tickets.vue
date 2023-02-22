@@ -453,7 +453,7 @@ export default {
         },
         loadFiltersFromLocalStorage() {
             this.filters = JSON.parse(localStorage.getItem('myFilters')) || {};
-			
+
             if (this.filters.sortBy) {
                 this.sortBy = this.filters.sortBy;
             }
