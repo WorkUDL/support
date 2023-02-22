@@ -451,31 +451,43 @@ export default {
                 })
                 .catch(err=> console.log(err))
         },
-        loadFiltersFromLocalStorage() {
-            this.filters = JSON.parse(localStorage.getItem('myFilters')) || {};
-
-            if (this.filters.sortBy) {
-                this.sortBy = this.filters.sortBy;
-            }
-            if (this.filters.sortDesc) {
-                this.sortDesc = this.filters.sortDesc;
-            }
+        loadFiltersFromDB() {
+            axios
+                .post('/api/table_filter/get_filters', {userId: this.currentUser.id}, {
+                    headers: {
+                        Authorization: 'Bearer '+this.currentToken
+                    }
+                }).then(res => {
+                if (res.data.sortBy) {
+                    this.sortBy = res.data.sortBy;
+                }
+                if (res.data.sortDesc) {
+                    this.sortDesc = res.data.sortDesc;
+                }
+                })
+                .catch(err => console.log(err))
         },
-        saveFiltersToLocalStorage() {
+        saveFiltersToDB() {
             window.addEventListener('beforeunload', () => {
                 this.filters.sortBy = this.sortBy;
                 this.filters.sortDesc = this.sortDesc;
-                localStorage.setItem('myFilters', JSON.stringify(this.filters));
+                axios
+                    .post('/api/table_filter/add_filters', {filters: JSON.stringify(this.filters)}, {
+                        headers: {
+                            Authorization: 'Bearer '+this.currentToken
+                        }
+                    }).then(res => console.log(res))
+                    .catch(err => console.log(err))
             });
         }
     },
     created() {
-        this.loadFiltersFromLocalStorage()
+        this.loadFiltersFromDB()
     },
     mounted() {
         this.getTickets()
         this.getTicketsParticipants()
-        this.saveFiltersToLocalStorage()
+        this.saveFiltersToDB()
     }
 }
 </script>

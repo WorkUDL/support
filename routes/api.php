@@ -140,3 +140,11 @@ Route::group([
     Route::post('/add_ticket_filters', [\App\Http\Controllers\TicketFilterController::class, 'add_ticket_filters']);
     Route::post('/get_ticket_filters', [\App\Http\Controllers\TicketFilterController::class, 'get_ticket_filters']);
 });
+
+Route::group([
+    'middleware' => 'auth:sanctum',
+    'prefix' => 'table_filter'
+], function ($router) {
+    Route::post('/add_filters', [\App\Http\Controllers\TableFilterController::class, 'add_filters']);
+    Route::post('/get_filters', [\App\Http\Controllers\TableFilterController::class, 'get_filters']);
+});

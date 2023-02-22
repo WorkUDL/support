@@ -739,31 +739,51 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         return console.log(err);
       });
     },
-    loadFiltersFromLocalStorage: function loadFiltersFromLocalStorage() {
-      this.filters = JSON.parse(localStorage.getItem('myFilters')) || {};
-      if (this.filters.sortBy) {
-        this.sortBy = this.filters.sortBy;
-      }
-      if (this.filters.sortDesc) {
-        this.sortDesc = this.filters.sortDesc;
-      }
-    },
-    saveFiltersToLocalStorage: function saveFiltersToLocalStorage() {
+    loadFiltersFromDB: function loadFiltersFromDB() {
       var _this8 = this;
+      axios.post('/api/table_filter/get_filters', {
+        userId: this.currentUser.id
+      }, {
+        headers: {
+          Authorization: 'Bearer ' + this.currentToken
+        }
+      }).then(function (res) {
+        if (res.data.sortBy) {
+          _this8.sortBy = res.data.sortBy;
+        }
+        if (res.data.sortDesc) {
+          _this8.sortDesc = res.data.sortDesc;
+        }
+      })["catch"](function (err) {
+        return console.log(err);
+      });
+    },
+    saveFiltersToDB: function saveFiltersToDB() {
+      var _this9 = this;
       window.addEventListener('beforeunload', function () {
-        _this8.filters.sortBy = _this8.sortBy;
-        _this8.filters.sortDesc = _this8.sortDesc;
-        localStorage.setItem('myFilters', JSON.stringify(_this8.filters));
+        _this9.filters.sortBy = _this9.sortBy;
+        _this9.filters.sortDesc = _this9.sortDesc;
+        axios.post('/api/table_filter/add_filters', {
+          filters: JSON.stringify(_this9.filters)
+        }, {
+          headers: {
+            Authorization: 'Bearer ' + _this9.currentToken
+          }
+        }).then(function (res) {
+          return console.log(res);
+        })["catch"](function (err) {
+          return console.log(err);
+        });
       });
     }
   },
   created: function created() {
-    this.loadFiltersFromLocalStorage();
+    this.loadFiltersFromDB();
   },
   mounted: function mounted() {
     this.getTickets();
     this.getTicketsParticipants();
-    this.saveFiltersToLocalStorage();
+    this.saveFiltersToDB();
   }
 });
 
