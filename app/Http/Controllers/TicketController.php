@@ -220,34 +220,26 @@ class TicketController extends Controller
                 'MESSAGE' => 'Новый тикет: [URL=/marketplace/view/120/?params[ticket_id]='.$ticket->id.']#'.$ticket->id.'[/URL]'
             ]);
         } else {
-            $groups = GroupUser::where('user_id', $manager->id)->get();
+            $group = Reason::where('reasons.id', $request->reason_id)
+                ->leftJoin('groups', 'groups.id', '=', 'reasons.group_id')
+                ->leftJoin('group_user', 'group_user.group_id', '=', 'groups.id')
+                ->first();
 
-            if ($groups->count() == 0) {
-                return 'Коллекция $groups пуста';
+            if ($group->count() == 0) {
+                return 'Коллекция $group пуста';
             }
 
-            //id других менеджеров из своих групп
-            $managers_id = $groups->map(function ($group){
-                return GroupUser::where('group_id', $group->group_id)->pluck('user_id')->filter(function($user_id) {
-                    return $user_id != Auth::id();
-                });
-            });
+            // id менеджеров из группы, к которой относится текущая проблема
+            $managers_id = GroupUser::where('group_user.group_id', $group->group_id)
+            ->leftJoin('users', 'users.id', '=', 'group_user.user_id')
+            ->where('users.online', 1)
+            ->pluck('user_id');
 
             if ($managers_id->count() == 0) {
-                return 'Коллекция $managers_id пуста';
+               $managers_id[] = 4;
             }
 
-            //id других менеджеров из своих групп, которые сейчас онлайн
-            $id_online_managers_my_groups = collect($managers_id)->flatten()->map(function ($id){
-                $user = User::find($id);
-                if($user->online == 1) {
-                    return $user->id;
-                }
-            })->filter();
-
-            $id_online_managers_my_groups[] = 4;
-
-            $first_manager = $id_online_managers_my_groups->first();
+            $first_manager = $managers_id->first();
 
             $first_manager_bitrix_id = User::where('id', $first_manager)->value('bitrix_id');
 
