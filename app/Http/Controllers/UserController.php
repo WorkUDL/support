@@ -51,11 +51,16 @@ class UserController extends Controller
             // все нужные активные тикеты (уже отсортированы)
             $not_read_message = Ticket::where('active', 1)
                 ->leftJoin('reasons', 'tickets.reason_id', '=', 'reasons.id')
-                ->leftJoin('messages', 'tickets.id', '=', 'messages.ticket_id')
                 ->whereIn('reasons.group_id', $groups_id)
-                ->whereNotIn('messages.user_id', $id_online_managers_my_groups)
+                ->whereNotIn('tickets.id', function ($query) use ($id_online_managers_my_groups) {
+                    $query->select('ticket_id')
+                        ->from('messages')
+                        ->whereIn('user_id', $id_online_managers_my_groups);
+                })
                 ->orderBy('reasons.weight', 'desc')
                 ->pluck('tickets.id');
+
+            dump($not_read_message);
 
             if ($not_read_message->count() == 0) {
                 return 'Коллекция $not_read_message пуста';
