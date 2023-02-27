@@ -32,7 +32,9 @@
                     overlap
                 >
                     <v-icon
+                        id="message"
                         @click="openMessage(item)"
+                        @mousedown.middle="openDialogInNewWindow(item)"
                     >
                         mdi-message-text
                     </v-icon>
@@ -302,13 +304,13 @@ export default {
             axios
                 .post('/api/user/all_managers', {}, {
                     headers: {
-                        Authorization: 'Bearer '+this.currentToken
+                        Authorization: 'Bearer ' + this.currentToken
                     }
                 }).then(res => {
-                    res.data.forEach((el) => {
-                        this.managers.push({name:el.name, lastName: el.last_name})
-                    })
+                res.data.forEach((el) => {
+                    this.managers.push({name: el.name, lastName: el.last_name})
                 })
+            })
                 .catch(err => console.log(err))
         },
         transferToAnotherManager() {
@@ -319,26 +321,28 @@ export default {
                     ticket: this.ticketForTransfer
                 }, {
                     headers: {
-                        Authorization: 'Bearer '+this.currentToken
+                        Authorization: 'Bearer ' + this.currentToken
                     }
                 }).then(res => console.log(res))
                 .catch(err => console.log(err))
                 .finally(this.dialogForTransfer = false)
         },
-        getDateTime(time){
+        getDateTime(time) {
             const date = new Date(time * 1000)
             return date.toLocaleString()
         },
-        openMessage(ticket){
+        openMessage(ticket) {
+            console.log(this.$router)
             this.$router.push({
                 name: 'bitrix-tickets-message',
                 params: {
                     ticket_id: ticket.id
                 }
             })
+            console.log(this.$router)
         },
-        openCouponForm(ticket){
-            if(this.$refs.couponForm){
+        openCouponForm(ticket) {
+            if (this.$refs.couponForm) {
                 this.$refs.couponForm.reset()
             }
             this.openCoupon = true
@@ -346,7 +350,7 @@ export default {
             this.ticketAction = ticket.id
             axios.post('/api/coupon/list', {}, {
                 headers: {
-                    Authorization: 'Bearer '+this.currentToken
+                    Authorization: 'Bearer ' + this.currentToken
                 }
             }).then(resp => {
                 this.couponCodes = resp.data.filter(i => i.status === 1)
@@ -356,8 +360,8 @@ export default {
                 this.couponCodesLoading = false
             })
         },
-        ApplyCoupon(){
-            if(this.$refs.couponForm.validate()){
+        ApplyCoupon() {
+            if (this.$refs.couponForm.validate()) {
                 this.loadingCouponForm = true
                 axios
                     .post('/api/coupon/apply', {
@@ -365,7 +369,7 @@ export default {
                         code: this.couponCode
                     }, {
                         headers: {
-                            Authorization: 'Bearer '+this.currentToken
+                            Authorization: 'Bearer ' + this.currentToken
                         }
                     })
                     .then(() => {
@@ -377,11 +381,11 @@ export default {
                     .finally(() => this.loadingCouponForm = false)
             }
         },
-        toArchive(ticket){
+        toArchive(ticket) {
             this.openConfirm = true
             this.ticketAction = ticket.id
         },
-        transferToArchive(){
+        transferToArchive() {
             this.transferingToArchive = true
             axios
                 .post('/api/ticket/archive', {
@@ -389,7 +393,7 @@ export default {
                     active: 0
                 }, {
                     headers: {
-                        Authorization: 'Bearer '+this.currentToken
+                        Authorization: 'Bearer ' + this.currentToken
                     }
                 })
                 .then(() => {
@@ -399,26 +403,26 @@ export default {
                 .catch(err => console.error(err))
                 .finally(() => this.transferingToArchive = false)
         },
-        getTickets(){
-                this.loadingTickets = true
-                axios
-                    .post('/api/ticket/list', {}, {
-                        headers: {
-                            Authorization: 'Bearer ' + this.currentToken
+        getTickets() {
+            this.loadingTickets = true
+            axios
+                .post('/api/ticket/list', {}, {
+                    headers: {
+                        Authorization: 'Bearer ' + this.currentToken
+                    }
+                })
+                .then(resp => {
+                    this.tickets = resp.data.map(ticket => {
+                        if (ticket.queue === null) {
+                            ticket.queue = 999999
                         }
+                        ticket.user_id = ticket.user.last_name + ' ' + ticket.user.name + ' ' + ticket.user.second_name
+                        console.log(ticket)
+                        return ticket
                     })
-                    .then(resp => {
-                        this.tickets = resp.data.map(ticket => {
-                            if (ticket.queue === null) {
-                                ticket.queue = 999999
-                            }
-                            ticket.user_id = ticket.user.last_name + ' ' + ticket.user.name + ' ' + ticket.user.second_name
-                            console.log(ticket)
-                            return ticket
-                        })
-                    })
-                    .catch(err => console.error(err))
-                    .finally(() => this.loadingTickets = false)
+                })
+                .catch(err => console.error(err))
+                .finally(() => this.loadingTickets = false)
         },
         setOnline(status) {
             axios
@@ -426,36 +430,36 @@ export default {
                     status
                 }, {
                     headers: {
-                        Authorization: 'Bearer '+this.currentToken
+                        Authorization: 'Bearer ' + this.currentToken
                     }
                 }).then(resp => {
-                    this.getTickets()
-                    this.isOnline = status
-                    console.log(resp)
-                })
+                this.getTickets()
+                this.isOnline = status
+                console.log(resp)
+            })
                 .catch(err => console.log(err))
         },
         getTicketsParticipants() {
             axios
                 .post('/api/ticket/participants', {}, {
                     headers: {
-                        Authorization: 'Bearer '+this.currentToken
+                        Authorization: 'Bearer ' + this.currentToken
                     }
-                }).then(res=> {
-                    console.log(res.data)
+                }).then(res => {
+                console.log(res.data)
                 res.data.forEach((ticket) => {
                     ticket.user_id = ticket.user_id.last_name + ' ' + ticket.user_id.name + ' ' + ticket.user_id.second_name
                     this.tickets.push(ticket)
                 })
                 console.log(this.tickets)
-                })
-                .catch(err=> console.log(err))
+            })
+                .catch(err => console.log(err))
         },
         loadFiltersFromDB() {
             axios
                 .post('/api/table_filter/get_filters', {userId: this.currentUser.id}, {
                     headers: {
-                        Authorization: 'Bearer '+this.currentToken
+                        Authorization: 'Bearer ' + this.currentToken
                     }
                 }).then(res => {
                 if (res.data.sortBy) {
@@ -464,7 +468,7 @@ export default {
                 if (res.data.sortDesc) {
                     this.sortDesc = res.data.sortDesc;
                 }
-                })
+            })
                 .catch(err => console.log(err))
         },
         saveFiltersToDB() {
@@ -474,12 +478,15 @@ export default {
                 axios
                     .post('/api/table_filter/add_filters', {filters: JSON.stringify(this.filters)}, {
                         headers: {
-                            Authorization: 'Bearer '+this.currentToken
+                            Authorization: 'Bearer ' + this.currentToken
                         }
                     }).then(res => console.log(res))
                     .catch(err => console.log(err))
             });
-        }
+        },
+        openDialogInNewWindow(ticket) {
+            window.open(`https://xn--24-9kc.xn--d1ao9c.xn--p1ai/marketplace/app/74/?ticket_id=${ticket.id}`)
+        },
     },
     created() {
         this.loadFiltersFromDB()

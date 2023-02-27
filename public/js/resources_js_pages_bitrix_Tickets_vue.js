@@ -126,12 +126,14 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       return date.toLocaleString();
     },
     openMessage: function openMessage(ticket) {
+      console.log(this.$router);
       this.$router.push({
         name: 'bitrix-tickets-message',
         params: {
           ticket_id: ticket.id
         }
       });
+      console.log(this.$router);
     },
     openCouponForm: function openCouponForm(ticket) {
       var _this2 = this;
@@ -293,6 +295,9 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           return console.log(err);
         });
       });
+    },
+    openDialogInNewWindow: function openDialogInNewWindow(ticket) {
+      window.open("https://xn--24-9kc.xn--d1ao9c.xn--p1ai/marketplace/app/74/?ticket_id=".concat(ticket.id));
     }
   },
   created: function created() {
@@ -380,9 +385,16 @@ var render = function render() {
             overlap: ""
           }
         }, [_c("v-icon", {
+          attrs: {
+            id: "message"
+          },
           on: {
             click: function click($event) {
               return _vm.openMessage(item);
+            },
+            mousedown: function mousedown($event) {
+              if ("button" in $event && $event.button !== 1) return null;
+              return _vm.openDialogInNewWindow(item);
             }
           }
         }, [_vm._v("\n                    mdi-message-text\n                ")])], 1), _vm._v(" "), item.coupon ? _c("v-icon", {
