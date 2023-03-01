@@ -283,10 +283,9 @@ export default {
 			sortBy: null,
 			sortDesc: null,
 			filters: {
-				search: null,
 				sortBy: [],
 				sortDesc: [],
-			}
+			},
         }
     },
     computed: {
@@ -456,19 +455,13 @@ export default {
                 .catch(err => console.log(err))
         },
         loadFiltersFromDB() {
-            axios
-                .post('/api/table_filter/get_filters', {userId: this.currentUser.id}, {
-                    headers: {
-                        Authorization: 'Bearer ' + this.currentToken
-                    }
-                }).then(res => {
-                if (res.data.sortBy) {
-                    this.sortBy = res.data.sortBy;
-                }
-                if (res.data.sortDesc) {
-                    this.sortDesc = res.data.sortDesc;
-                }
+            axios.post('/api/table_filter/get_filters', { userId: this.currentUser.id }, {
+                headers: { Authorization: 'Bearer ' + this.currentToken }
             })
+                .then(res => {
+                    this.sortBy = res.data.sortBy
+                    this.sortDesc = res.data.sortDesc
+                })
                 .catch(err => console.log(err))
         },
         saveFiltersToDB() {
@@ -480,7 +473,8 @@ export default {
                         headers: {
                             Authorization: 'Bearer ' + this.currentToken
                         }
-                    }).then(res => console.log(res))
+                    })
+                    .then(res => console.log(res))
                     .catch(err => console.log(err))
             });
         },
@@ -490,11 +484,12 @@ export default {
     },
     created() {
         this.loadFiltersFromDB()
+        this.saveFiltersToDB()
+
     },
     mounted() {
         this.getTickets()
         this.getTicketsParticipants()
-        this.saveFiltersToDB()
     }
 }
 </script>

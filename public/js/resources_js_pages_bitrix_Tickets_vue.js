@@ -68,7 +68,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       sortBy: null,
       sortDesc: null,
       filters: {
-        search: null,
         sortBy: [],
         sortDesc: []
       }
@@ -268,12 +267,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           Authorization: 'Bearer ' + this.currentToken
         }
       }).then(function (res) {
-        if (res.data.sortBy) {
-          _this8.sortBy = res.data.sortBy;
-        }
-        if (res.data.sortDesc) {
-          _this8.sortDesc = res.data.sortDesc;
-        }
+        _this8.sortBy = res.data.sortBy;
+        _this8.sortDesc = res.data.sortDesc;
       })["catch"](function (err) {
         return console.log(err);
       });
@@ -302,11 +297,11 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   },
   created: function created() {
     this.loadFiltersFromDB();
+    this.saveFiltersToDB();
   },
   mounted: function mounted() {
     this.getTickets();
     this.getTicketsParticipants();
-    this.saveFiltersToDB();
   }
 });
 
