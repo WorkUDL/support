@@ -898,6 +898,7 @@ var render = function render() {
       "justify-content": "center",
       "align-items": "flex-start",
       display: "flex",
+      "pointer-events": "none",
       position: "sticky",
       top: "64px",
       "z-index": "1",

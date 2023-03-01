@@ -79,6 +79,7 @@
                                 <v-row style="white-space: pre;">
                                     <v-col cols="12" v-if="item.full">
                                         <bbob-bbcode container="div" style="white-space: pre-wrap;">{{ item.full }}</bbob-bbcode>  <!-- текст подсказки -->
+                                        <v-checkbox v-model="item.checked" color="green" label="Изучено" class="float-right"/>
                                     </v-col>
                                     <v-col cols="12" v-if="item.iframe">
                                         <iframe style="max-width: 100%;"
@@ -118,16 +119,17 @@
 
                     <v-btn
                         color="primary"
-                        v-if="!skippedHint && hints.length"
+                        v-if="!skippedHint && hints.length && checkedHint"
                         @click="skippedHint = true"
                         class="float-right"
                     >Рекомендации не помогли</v-btn>
-
-                    <v-btn
-                    v-else-if="!skippedHint && hints.length "
-                    color="success"
-                    class="float-right"
-                    >Ознакомьтесь с подсказкой</v-btn>
+                    <v-card
+                    v-else-if="!checkedHint"
+                    >
+                        <v-card-text>
+                            Изучите все подсказки, после появится возможность создать тикет!
+                        </v-card-text>
+                    </v-card>
 
                     <v-card v-if="skippedHint || !hints.length">
                         <v-card-text>
@@ -593,6 +595,10 @@ export default {
             console.log(this.hintList)
             this.openedHint = this.hintList.filter(h => h.reason_id === this.reasonsActive.id).length === 1 ? [0] : []
             return this.hintList.filter(h => h.reason_id === this.reasonsActive.id)
+        },
+        checkedHint()  {
+            const filteredItems = this.hints.filter(item => this.reasonsActive.id === item.reason_id && item.checked)
+            return filteredItems.length === this.hints.length
         },
     },
     watch: {
