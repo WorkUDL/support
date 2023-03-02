@@ -718,8 +718,8 @@ var render = function render() {
         "max-width": "100%"
       },
       attrs: {
-        width: "560",
-        height: "315",
+        width: "640",
+        height: "360",
         frameborder: "0",
         src: item.iframe,
         allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
@@ -855,11 +855,11 @@ var render = function render() {
     directives: [{
       name: "show",
       rawName: "v-show",
-      value: _vm.parentId === 5,
-      expression: "parentId === 5"
+      value: _vm.parentId === 5 || _vm.parentId === 6,
+      expression: "parentId === 5 || parentId === 6"
     }],
     attrs: {
-      rules: _vm.parentId === 5 ? _vm.requiredRules : [],
+      rules: _vm.parentId === 5 || _vm.parentId === 6 ? _vm.requiredRules : [],
       label: "Введите номер вашего AnyDesk",
       type: "number",
       min: "1"
@@ -1312,7 +1312,7 @@ var render = function render() {
   }, [_c("v-text-field", {
     attrs: {
       outlined: "",
-      label: "Ссылка на видео (https://www.youtube.com/embed/MmdKeypSxE8)"
+      label: "Ссылка на видео (https://www.youtube.com/embed/J-J-EJ9CXNw)"
     },
     model: {
       value: _vm.iframeHint,

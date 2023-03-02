@@ -83,8 +83,8 @@
                                     </v-col>
                                     <v-col cols="12" v-if="item.iframe">
                                         <iframe style="max-width: 100%;"
-                                            width="560"
-                                            height="315"
+                                            width="640"
+                                            height="360"
                                             frameborder="0"
                                             :src="item.iframe"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -183,9 +183,9 @@
                                     label="Подробно распишите суть проблемы"
                                 />
                                 <v-text-field
-                                    :rules="parentId === 5 ? requiredRules : []"
+                                    :rules="parentId === 5 || parentId === 6 ? requiredRules : []"
                                     v-model="anyDeskNumber"
-                                    v-show="parentId === 5"
+                                    v-show="parentId === 5 || parentId === 6"
                                     label="Введите номер вашего AnyDesk"
                                     type="number" min="1">
 <!--                                в parentId нужно указать id проблемы(группы) Комьютер-->
@@ -474,7 +474,7 @@
                             <v-text-field
                                 v-model="iframeHint"
                                 outlined
-                                label="Ссылка на видео (https://www.youtube.com/embed/MmdKeypSxE8)"
+                                label="Ссылка на видео (https://www.youtube.com/embed/J-J-EJ9CXNw)"
                             />
                         </v-col>
                         <v-col cols="12">

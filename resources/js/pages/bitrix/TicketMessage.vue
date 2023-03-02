@@ -3,7 +3,7 @@
         <v-row style="padding-bottom: 150px;" class="message_list">
 			<v-row
 				class="pa-2"
-				style="color: #202326;justify-content: center;align-items: flex-start;display: flex;pointer-events: none;position: sticky;top: 64px;z-index: 1;background: none;"
+				style="color: #202326;justify-content: center;align-items: flex-start;display: flex;position: sticky;top: 64px;z-index: 1;background: none;"
 				v-if="isAdmin || isManager"
 			>
 				<v-card
