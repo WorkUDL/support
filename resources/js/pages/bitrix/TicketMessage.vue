@@ -152,6 +152,7 @@
                                         </v-icon>
                                     </v-btn>
                                     <v-btn
+                                        v-if="isAdmin || isManager"
 										@click="getAllManagers"
 										small
 										fab

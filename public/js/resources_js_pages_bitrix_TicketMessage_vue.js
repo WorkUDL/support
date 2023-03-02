@@ -1121,7 +1121,7 @@ var render = function render() {
           attrs: {
             color: "white"
           }
-        }, [_vm._v("\n                                            mdi-account-supervisor\n                                        ")])], 1), _vm._v(" "), _c("v-btn", {
+        }, [_vm._v("\n                                            mdi-account-supervisor\n                                        ")])], 1), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-btn", {
           attrs: {
             small: "",
             fab: "",
@@ -1134,7 +1134,7 @@ var render = function render() {
           attrs: {
             color: "white"
           }
-        }, [_vm._v("\n                                            mdi-account-switch\n                                        ")])], 1), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-btn", {
+        }, [_vm._v("\n                                            mdi-account-switch\n                                        ")])], 1) : _vm._e(), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-btn", {
           attrs: {
             small: "",
             fab: "",
@@ -1175,7 +1175,7 @@ var render = function render() {
         }, [_vm._v("\n                                    mdi-send\n                                ")])], 1)];
       },
       proxy: true
-    }], null, false, 3919678718),
+    }], null, false, 4075643901),
     model: {
       value: _vm.message,
       callback: function callback($$v) {
