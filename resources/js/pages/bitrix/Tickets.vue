@@ -5,7 +5,8 @@
             :items="tickets"
             :loading="loadingTickets"
             multi-sort
-            :items-per-page="15"
+            :items-per-page="perPage"
+            @update:items-per-page="updatePerPage"
             item-key="id"
             class="elevation-1"
             :search="filters.search"
@@ -226,6 +227,7 @@ export default {
     name: "Success",
     data() {
         return {
+            perPage: null,
             loadingTickets: false,
             openConfirm: false,
             validCouponForm: false,
@@ -405,7 +407,9 @@ export default {
         getTickets() {
             this.loadingTickets = true
             axios
-                .post('/api/ticket/list', {}, {
+                .post('/api/ticket/list', {
+                    page: this.perPage,
+                }, {
                     headers: {
                         Authorization: 'Bearer ' + this.currentToken
                     }
@@ -481,6 +485,12 @@ export default {
         openDialogInNewWindow(ticket) {
             window.open(`https://xn--24-9kc.xn--d1ao9c.xn--p1ai/marketplace/app/74/?ticket_id=${ticket.id}`)
         },
+        updatePerPage(val) {
+            this.perPage = 10
+            this.perPage = val
+            this.getTickets()
+            this.getTicketsParticipants()
+        },
     },
     created() {
         this.loadFiltersFromDB()
@@ -488,8 +498,7 @@ export default {
 
     },
     mounted() {
-        this.getTickets()
-        this.getTicketsParticipants()
+        this.updatePerPage()
     }
 }
 </script>

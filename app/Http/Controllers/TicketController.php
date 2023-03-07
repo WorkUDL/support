@@ -32,6 +32,8 @@ class TicketController extends Controller
 
     public function list(Request $request)
     {
+        $perPage = $request->page ?? 10;
+
         $users = User::query()->where('is_manager', 1)->get()->each(function($user) {
             $user->ticketList = $user->tickets->map(function($ticket) {
                 $ticket->weight = $ticket->reason->weight + ($ticket->coupon->weight ?? 0);
@@ -60,24 +62,49 @@ class TicketController extends Controller
                 ->get()->pluck('id')->toArray();
         }
 
-        return Ticket::query()->where('active', $request->active ?? 1)->get()->filter(function($ticket) use ($ticketUsers) {
-            return (Auth::user()->is_manager and $ticket->manager_id == Auth::id())
-                or in_array($ticket->user_id, $ticketUsers);
-        })->map(function ($item) use ($users) {
-            $unread = $this->checkStatus($item->id, Auth::id());
+        if($perPage !== 0-1 || null) {
+            $tickets = Ticket::query()->where('active', $request->active ?? 1)
+                ->orderBy('created_at', 'desc')->get()->filter(function($ticket) use ($ticketUsers) {
+                return (Auth::user()->is_manager and $ticket->manager_id == Auth::id())
+                    or in_array($ticket->user_id, $ticketUsers);
+            })
+                ->take($perPage)
+                ->map(function ($item) use ($users) {
+                    $unread = $this->checkStatus($item->id, Auth::id());
+                    return [
+                        'id' => $item->id,
+                        'user' => $item->user,
+                        'coupon' => $item->coupon_id,
+                        'name' => Reason::query()->find($item->reason_id)->name,
+                        'status' => $unread > 0,
+                        'queue' => $this->getQueue($item, $users),
+                        'weight' => $item->weight,
+                        'unread' => $unread,
+                        'created_at' => $item->created_at->getTimestamp(),
+                    ];
+                })->values();
+        } else {
+            $tickets = Ticket::query()->where('active', $request->active ?? 1)->get()->filter(function($ticket) use ($ticketUsers) {
+                return (Auth::user()->is_manager and $ticket->manager_id == Auth::id())
+                    or in_array($ticket->user_id, $ticketUsers);
+            })
+                ->map(function ($item) use ($users) {
+                    $unread = $this->checkStatus($item->id, Auth::id());
 
-            return [
-                'id' => $item->id,
-                'user' => $item->user,
-                'coupon' => $item->coupon_id,
-                'name' => Reason::query()->find($item->reason_id)->name,
-                'status' => $unread > 0,
-                'queue' => $this->getQueue($item, $users),
-                'weight' => $item->weight,
-                'unread' => $unread,
-                'created_at' => $item->created_at->getTimestamp(),
-            ];
-        })->values();
+                    return [
+                        'id' => $item->id,
+                        'user' => $item->user,
+                        'coupon' => $item->coupon_id,
+                        'name' => Reason::query()->find($item->reason_id)->name,
+                        'status' => $unread > 0,
+                        'queue' => $this->getQueue($item, $users),
+                        'weight' => $item->weight,
+                        'unread' => $unread,
+                        'created_at' => $item->created_at->getTimestamp(),
+                    ];
+                })->values();
+        }
+        return $tickets;
     }
 
     public function tickets_for_participants()
@@ -102,14 +129,14 @@ class TicketController extends Controller
                     $item = Ticket::where('id', $ticket_id)->where('active', 1)->first();
                     if ($item) {
                         $unread = $this->checkStatus($item->id, $user_id);
-                        $user = User::where('id', $user_id)->first();
+                        $user = User::where('id', $item->user_id)->first();
                         $tickets->push([
                             'id' => $item->id,
                             'user_id' => $user,
                             'coupon' => $item->coupon_id,
                             'name' => 'Вас добавил администратор',
                             'status' => $unread > 0,
-                            'queue' => 0,
+                            'queue' => $this->getQueueForManager($item->id, $user_id),
                             'unread' => $unread,
                             'created_at' => $item->created_at->getTimestamp(),
                         ]);
@@ -117,8 +144,18 @@ class TicketController extends Controller
                 }
             }
         }
-
         return $tickets;
+    }
+
+    private function getQueueForManager($ticket_id, $manager_id)
+    {
+        return Participant::leftJoin('tickets', 'participants.ticket_id', '=', 'tickets.id')
+        ->leftJoin('reasons', 'tickets.reason_id', '=', 'reasons.id')
+        ->where('tickets.active', 1)
+        ->where('participants.user_id', $manager_id)
+        ->orderBy('reasons.weight', 'desc')
+        ->pluck('tickets.id')
+        ->search($ticket_id) + 1;
     }
 
     private function getQueue($item, $users)

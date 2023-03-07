@@ -6,6 +6,7 @@ use App\Models\Participant;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class ParticipantController extends Controller
 {
@@ -37,5 +38,9 @@ class ParticipantController extends Controller
             ]);
 
         }
+        Http::post(CRest::WEBHOOK.'/im.message.add', [
+            'DIALOG_ID' => $request->users[0]['id'],
+            'MESSAGE' => 'Вас добавили в тикет: [URL=/marketplace/view/120/?params[ticket_id]='.$request->ticket_id.']#'.$request->ticket_id.'[/URL]'
+        ]);
     }
 }

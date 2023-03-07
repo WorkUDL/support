@@ -183,6 +183,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     addParticipants: function addParticipants() {
       var _this5 = this;
+      this.message = 'Добавил в чат пользователя!';
+      this.sendMessage();
       if (this.$refs.newParticipantForm.validate()) {
         this.newParticipantFormLoading = true;
         axios.post('/api/participant/add', {
@@ -505,6 +507,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   name: "Success",
   data: function data() {
     return {
+      perPage: null,
       loadingTickets: false,
       openConfirm: false,
       validCouponForm: false,
@@ -688,7 +691,9 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     getTickets: function getTickets() {
       var _this5 = this;
       this.loadingTickets = true;
-      axios.post('/api/ticket/list', {}, {
+      axios.post('/api/ticket/list', {
+        page: this.perPage
+      }, {
         headers: {
           Authorization: 'Bearer ' + this.currentToken
         }
@@ -775,6 +780,12 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     openDialogInNewWindow: function openDialogInNewWindow(ticket) {
       window.open("https://xn--24-9kc.xn--d1ao9c.xn--p1ai/marketplace/app/74/?ticket_id=".concat(ticket.id));
+    },
+    updatePerPage: function updatePerPage(val) {
+      this.perPage = 10;
+      this.perPage = val;
+      this.getTickets();
+      this.getTicketsParticipants();
     }
   },
   created: function created() {
@@ -782,8 +793,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     this.saveFiltersToDB();
   },
   mounted: function mounted() {
-    this.getTickets();
-    this.getTicketsParticipants();
+    this.updatePerPage();
   }
 });
 
@@ -1508,13 +1518,14 @@ var render = function render() {
       items: _vm.tickets,
       loading: _vm.loadingTickets,
       "multi-sort": "",
-      "items-per-page": 15,
+      "items-per-page": _vm.perPage,
       "item-key": "id",
       search: _vm.filters.search,
       "sort-by": _vm.sortBy,
       "sort-desc": _vm.sortDesc
     },
     on: {
+      "update:items-per-page": _vm.updatePerPage,
       "update:sortBy": function updateSortBy($event) {
         _vm.sortBy = $event;
       },

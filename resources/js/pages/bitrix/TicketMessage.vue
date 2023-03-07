@@ -573,6 +573,8 @@ export default {
                 .finally(() => this.loadingParticipants = false)
         },
         addParticipants(){
+            this.message = 'Добавил в чат пользователя!'
+            this.sendMessage()
             if(this.$refs.newParticipantForm.validate()) {
                 this.newParticipantFormLoading = true
 

@@ -7,7 +7,8 @@
             :sort-by="['status','queue']"
             :sort-desc="[true,false]"
             multi-sort
-            :items-per-page="10"
+            :items-per-page="perPage"
+            @update:items-per-page="updatePerPage"
             class="elevation-1"
         >
             <template v-slot:item.created_at="{ item }">
@@ -40,6 +41,7 @@ export default {
     name: "Archive",
     data() {
         return {
+            perPage: null,
             loadingTickets: false,
             tickets: [],
             headers: [
@@ -68,6 +70,11 @@ export default {
         ...mapState(['currentToken']),
     },
     methods: {
+        updatePerPage(val) {
+          this.perPage = 10
+          this.perPage = val
+          this.getTickets()
+        },
         getDateTime(time){
             const date = new Date(time * 1000)
             return date.toLocaleString()
@@ -85,7 +92,8 @@ export default {
 
             axios
                 .post('/api/ticket/list', {
-                    active: 0
+                    page: this.perPage,
+                    active: 0,
                 }, {
                     headers: {
                         Authorization: 'Bearer '+this.currentToken
@@ -100,7 +108,8 @@ export default {
         }
     },
     mounted() {
-        this.getTickets()
+        // this.getTickets()
+        this.updatePerPage()
     }
 }
 </script>

@@ -23,6 +23,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   name: "Archive",
   data: function data() {
     return {
+      perPage: null,
       loadingTickets: false,
       tickets: [],
       headers: [{
@@ -44,6 +45,11 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
   },
   computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['currentToken'])),
   methods: {
+    updatePerPage: function updatePerPage(val) {
+      this.perPage = 10;
+      this.perPage = val;
+      this.getTickets();
+    },
     getDateTime: function getDateTime(time) {
       var date = new Date(time * 1000);
       return date.toLocaleString();
@@ -60,6 +66,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       var _this = this;
       this.loadingTickets = true;
       axios.post('/api/ticket/list', {
+        page: this.perPage,
         active: 0
       }, {
         headers: {
@@ -78,7 +85,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     }
   },
   mounted: function mounted() {
-    this.getTickets();
+    // this.getTickets()
+    this.updatePerPage();
   }
 });
 
@@ -107,7 +115,10 @@ var render = function render() {
       "sort-by": ["status", "queue"],
       "sort-desc": [true, false],
       "multi-sort": "",
-      "items-per-page": 10
+      "items-per-page": _vm.perPage
+    },
+    on: {
+      "update:items-per-page": _vm.updatePerPage
     },
     scopedSlots: _vm._u([{
       key: "item.created_at",
