@@ -1270,7 +1270,7 @@ var render = function render() {
         return [_vm._v("\n                        " + _vm._s(_vm.participantStatuses[item.status] || _vm.participantStatuses[0]) + "\n                    ")];
       }
     }])
-  }), _vm._v(" "), _vm.isAdmin || _vm.isManager ? _c("v-card-actions", [_c("v-spacer"), _vm._v(" "), _c("v-btn", {
+  }), _vm._v(" "), _c("v-card-actions", [_c("v-spacer"), _vm._v(" "), _c("v-btn", {
     attrs: {
       color: "blue darken-1",
       text: ""
@@ -1289,7 +1289,7 @@ var render = function render() {
         _vm.newParticipantForm = true;
       }
     }
-  }, [_vm._v("\n                        Добавить\n                    ")])], 1) : _vm._e()], 1)], 1), _vm._v(" "), _c("v-dialog", {
+  }, [_vm._v("\n                        Добавить\n                    ")])], 1)], 1)], 1), _vm._v(" "), _c("v-dialog", {
     attrs: {
       persistent: "",
       scrollable: "",

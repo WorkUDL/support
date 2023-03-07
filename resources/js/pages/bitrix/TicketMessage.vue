@@ -253,7 +253,7 @@
                         {{ participantStatuses[item.status] || participantStatuses[0] }}
                     </template>
                 </v-data-table>
-                <v-card-actions v-if="isAdmin || isManager">
+                <v-card-actions>
                     <v-spacer/>
                     <v-btn
                         color="blue darken-1"
